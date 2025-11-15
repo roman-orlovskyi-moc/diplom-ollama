@@ -1,0 +1,159 @@
+/* Custom styles for Prompt Injection Testing Framework */
+
+:root {
+    --primary-color: #0d6efd;
+    --danger-color: #dc3545;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.jumbotron {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.jumbotron h1 {
+    color: white;
+}
+
+.jumbotron .lead {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+}
+
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    border: 1px solid #dee2e6;
+}
+
+.progress {
+    background-color: #e9ecef;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+footer {
+    margin-top: auto;
+}
+
+/* Attack severity colors */
+.severity-critical {
+    border-left: 4px solid var(--danger-color);
+}
+
+.severity-high {
+    border-left: 4px solid var(--warning-color);
+}
+
+.severity-medium {
+    border-left: 4px solid #17a2b8;
+}
+
+.severity-low {
+    border-left: 4px solid #6c757d;
+}
+
+/* Demo page specific */
+#attackInfo {
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Comparison table */
+.table-responsive {
+    border-radius: 0.25rem;
+}
+
+/* Dashboard cards */
+.display-4 {
+    font-size: 3rem;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .jumbotron h1 {
+        font-size: 2rem;
+    }
+
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Success/Error states */
+.alert-success {
+    border-left: 4px solid var(--success-color);
+}
+
+.alert-danger {
+    border-left: 4px solid var(--danger-color);
+}
+
+.alert-warning {
+    border-left: 4px solid var(--warning-color);
+}
+
+/* Code blocks */
+code {
+    background-color: #f8f9fa;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 87.5%;
+}
+
+/* Tab styling */
+.nav-tabs .nav-link {
+    color: #6c757d;
+}
+
+.nav-tabs .nav-link.active {
+    font-weight: 600;
+}

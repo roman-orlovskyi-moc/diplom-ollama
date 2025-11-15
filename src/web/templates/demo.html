@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+
+{% block title %}Interactive Demo{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-play-circle"></i> Interactive Demo</h1>
+<p class="lead">Test prompt injection attacks against different defense mechanisms in real-time.</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="bi bi-bug"></i> Select Attack</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="attackSelect" class="form-label">Attack Pattern:</label>
+                    <select class="form-select" id="attackSelect">
+                        <option value="">Choose an attack...</option>
+                        {% for attack in attacks %}
+                        <option value="{{ attack.id }}"
+                                data-name="{{ attack.name }}"
+                                data-category="{{ attack.category }}"
+                                data-severity="{{ attack.severity }}"
+                                data-system="{{ attack.context.system_prompt }}"
+                                data-user="{{ attack.context.user_message }}">
+                            [{{ attack.severity|upper }}] {{ attack.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div id="attackInfo" style="display:none;">
+                    <div class="alert alert-info">
+                        <strong>Category:</strong> <span id="attackCategory"></span><br>
+                        <strong>Severity:</strong> <span id="attackSeverity" class="badge"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>System Prompt:</strong></label>
+                        <div class="p-2 bg-light rounded">
+                            <small id="systemPrompt" class="text-muted"></small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><strong>Malicious User Input:</strong></label>
+                        <div class="p-2 bg-warning bg-opacity-10 rounded border border-warning">
+                            <small id="userMessage"></small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="bi bi-shield-check"></i> Select Defense</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="defenseSelect" class="form-label">Defense Mechanism:</label>
+                    <select class="form-select" id="defenseSelect">
+                        {% for key, (label, defense) in defenses.items() %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button id="testButton" class="btn btn-primary btn-lg w-100" disabled>
+                    <i class="bi bi-play-fill"></i> Run Test
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="resultsSection" class="row mt-4" style="display:none;">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clipboard-data"></i> Test Results</h5>
+            </div>
+            <div class="card-body">
+                <div id="loadingSpinner" class="text-center" style="display:none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Testing...</span>
+                    </div>
+                    <p class="mt-2">Testing attack against defense...</p>
+                </div>
+
+                <div id="resultsContent" style="display:none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Attack Outcome:</h6>
+                            <div id="attackOutcome"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Performance:</h6>
+                            <div>
+                                <strong>Latency:</strong> <span id="latency"></span> ms<br>
+                                <strong>Tokens:</strong> <span id="tokens"></span><br>
+                                <strong>Cost:</strong> $<span id="cost"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <h6>LLM Response:</h6>
+                    <div class="p-3 bg-light rounded">
+                        <pre id="response" class="mb-0" style="white-space: pre-wrap;"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    $('#attackSelect').change(function() {
+        const selected = $(this).find(':selected');
+        if (selected.val()) {
+            $('#attackInfo').show();
+            $('#attackCategory').text(selected.data('category').replace('_', ' '));
+
+            const severity = selected.data('severity');
+            const severityColors = {
+                'critical': 'danger',
+                'high': 'warning',
+                'medium': 'info',
+                'low': 'secondary'
+            };
+            $('#attackSeverity')
+                .removeClass()
+                .addClass('badge bg-' + severityColors[severity])
+                .text(severity.toUpperCase());
+
+            $('#systemPrompt').text(selected.data('system'));
+            $('#userMessage').text(selected.data('user'));
+            $('#testButton').prop('disabled', false);
+        } else {
+            $('#attackInfo').hide();
+            $('#testButton').prop('disabled', true);
+        }
+        $('#resultsSection').hide();
+    });
+
+    $('#testButton').click(function() {
+        const attackId = $('#attackSelect').val();
+        const defense = $('#defenseSelect').val();
+
+        if (!attackId) return;
+
+        $('#resultsSection').show();
+        $('#loadingSpinner').show();
+        $('#resultsContent').hide();
+
+        $.ajax({
+            url: '/api/test-attack',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                attack_id: attackId,
+                defense: defense
+            }),
+            success: function(data) {
+                $('#loadingSpinner').hide();
+                $('#resultsContent').show();
+
+                const success = data.attack_successful;
+                const outcomeHtml = success
+                    ? '<div class="alert alert-danger"><i class="bi bi-x-circle-fill"></i> <strong>ATTACK SUCCEEDED</strong><br><small>Defense failed to block the attack</small></div>'
+                    : '<div class="alert alert-success"><i class="bi bi-check-circle-fill"></i> <strong>ATTACK BLOCKED</strong><br><small>Defense successfully prevented the attack</small></div>';
+
+                $('#attackOutcome').html(outcomeHtml);
+                $('#latency').text(data.latency_ms);
+                $('#tokens').text(data.tokens_used);
+                $('#cost').text(data.cost.toFixed(6));
+                $('#response').text(data.response);
+            },
+            error: function(xhr) {
+                $('#loadingSpinner').hide();
+                $('#resultsContent').show();
+                $('#attackOutcome').html(
+                    '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle-fill"></i> Error: ' +
+                    (xhr.responseJSON?.error || 'Unknown error') + '</div>'
+                );
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

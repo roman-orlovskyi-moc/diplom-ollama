@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+
+{% block content %}
+<h1><i class="bi bi-info-circle"></i> About This Project</h1>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h3>Prompt Injection Testing Framework</h3>
+                <p class="lead">
+                    An interactive testing framework for demonstrating prompt injection attacks against Large Language Models
+                    and evaluating various defense mechanisms.
+                </p>
+
+                <h4 class="mt-4">Purpose</h4>
+                <p>
+                    This framework was developed as part of a thesis on
+                    <strong>"Comparative Analysis of the Effectiveness of Protection Methods Against Prompt Injection Attacks on Large Language Models"</strong>.
+                </p>
+
+                <h4 class="mt-4">Features</h4>
+                <ul>
+                    <li><strong>66 Attack Patterns</strong> across 6 major categories</li>
+                    <li><strong>5 Defense Mechanisms</strong> with different approaches</li>
+                    <li><strong>Automated Evaluation</strong> with metrics and statistics</li>
+                    <li><strong>Interactive Demo</strong> for live testing</li>
+                    <li><strong>Comparison Tools</strong> for analyzing defense effectiveness</li>
+                    <li><strong>Comprehensive Documentation</strong> for research reproducibility</li>
+                </ul>
+
+                <h4 class="mt-4">Attack Categories</h4>
+                <ol>
+                    <li><strong>Direct Injection</strong> - Direct attempts to override system instructions</li>
+                    <li><strong>Jailbreak</strong> - Bypassing safety guidelines and ethical constraints</li>
+                    <li><strong>Role Confusion</strong> - Confusing the model about its role or identity</li>
+                    <li><strong>Context Switching</strong> - Switching context, language, or format</li>
+                    <li><strong>Indirect Injection</strong> - Injection through external data or documents</li>
+                    <li><strong>Data Extraction</strong> - Extracting system prompts or training data</li>
+                </ol>
+
+                <h4 class="mt-4">Defense Mechanisms</h4>
+                <ol>
+                    <li><strong>Input Sanitization</strong> - Blocklist-based filtering</li>
+                    <li><strong>Prompt Templating</strong> - Structured prompts with delimiters</li>
+                    <li><strong>Output Filtering</strong> - Response content scanning</li>
+                    <li><strong>Context Isolation</strong> - XML-based context separation</li>
+                    <li><strong>Dual-LLM Verification</strong> - Guardian model validation</li>
+                </ol>
+
+                <h4 class="mt-4">Technology Stack</h4>
+                <ul>
+                    <li><strong>Backend:</strong> Python 3.12, Flask</li>
+                    <li><strong>LLM:</strong> Ollama (llama3.2)</li>
+                    <li><strong>Database:</strong> SQLite</li>
+                    <li><strong>Frontend:</strong> Bootstrap 5, jQuery</li>
+                    <li><strong>Deployment:</strong> Docker Compose</li>
+                </ul>
+
+                <h4 class="mt-4">Research Contributions</h4>
+                <ul>
+                    <li>Comprehensive attack pattern library</li>
+                    <li>Quantitative comparison of defense mechanisms</li>
+                    <li>Reproducible testing methodology</li>
+                    <li>Interactive demonstration tool</li>
+                    <li>Open-source implementation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Quick Links</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="/demo" class="list-group-item list-group-item-action">
+                    <i class="bi bi-play-circle"></i> Try Interactive Demo
+                </a>
+                <a href="/attacks" class="list-group-item list-group-item-action">
+                    <i class="bi bi-bug"></i> Browse Attack Library
+                </a>
+                <a href="/comparison" class="list-group-item list-group-item-action">
+                    <i class="bi bi-bar-chart"></i> Compare Defenses
+                </a>
+                <a href="/dashboard" class="list-group-item list-group-item-action">
+                    <i class="bi bi-graph-up"></i> View Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Project Info</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Author:</strong> Thesis Student</p>
+                <p><strong>Field:</strong> Cybersecurity</p>
+                <p><strong>Year:</strong> 2024</p>
+                <p><strong>Institution:</strong> University</p>
+                <p class="mb-0"><strong>License:</strong> Academic Use</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

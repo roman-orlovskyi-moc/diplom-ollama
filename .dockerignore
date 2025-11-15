@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
+.env
+
+# Data (will be mounted as volume)
+data/results/*.db
+data/exports/*.csv
+data/exports/visualizations/*.png
+
+# Logs (will be mounted as volume)
+logs/*.log
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in container)
+*.md
+!README.md
+
+# Others
+.DS_Store
+Thumbs.db

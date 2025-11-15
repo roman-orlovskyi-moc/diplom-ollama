@@ -1,0 +1,24 @@
+# Docker Compose using local Ollama installation
+# Use this when you already have Ollama running on host
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thesis-app
+    network_mode: "host"  # Use host network to access local Ollama
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    environment:
+      - LLM_PROVIDER=ollama
+      - OLLAMA_BASE_URL=http://localhost:11434
+      - OLLAMA_MODEL=llama3.2
+      - DATABASE_PATH=/app/data/results/test_results.db
+      - LOG_LEVEL=INFO
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+    restart: "no"
