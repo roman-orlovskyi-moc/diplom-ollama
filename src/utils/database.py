@@ -20,7 +20,8 @@ class Database:
 
     def connect(self):
         """Connect to database"""
-        self.conn = sqlite3.connect(str(self.db_path))
+        # Use check_same_thread=False to allow multi-threaded access in Flask
+        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
 
     def close(self):

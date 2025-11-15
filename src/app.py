@@ -34,6 +34,7 @@ attack_engine.load_attacks()
 
 llm_client = LLMClientFactory.create_from_env()
 db = Database()
+db.create_tables()  # Ensure database tables are created
 eval_engine = EvaluationEngine(llm_client, db)
 
 # Available defenses
