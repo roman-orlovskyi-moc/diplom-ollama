@@ -18,6 +18,22 @@ from src.defenses.prompt_template import PromptTemplate
 from src.defenses.output_filter import OutputFilter
 from src.defenses.context_isolation import ContextIsolation
 from src.defenses.dual_llm import DualLLM
+from src.defenses.instruction_hierarchy import InstructionHierarchy
+
+# Try to import ML-based defenses (optional dependencies)
+try:
+    from src.defenses.perplexity_filter import PerplexityFilter
+    PERPLEXITY_AVAILABLE = True
+except ImportError:
+    PERPLEXITY_AVAILABLE = False
+    PerplexityFilter = None
+
+try:
+    from src.defenses.semantic_similarity import SemanticSimilarity
+    SEMANTIC_AVAILABLE = True
+except ImportError:
+    SEMANTIC_AVAILABLE = False
+    SemanticSimilarity = None
 
 # Configure Flask with correct template and static paths
 template_dir = project_root / 'src' / 'web' / 'templates'
@@ -37,14 +53,22 @@ db = Database()
 db.create_tables()  # Ensure database tables are created
 eval_engine = EvaluationEngine(llm_client, db)
 
-# Available defenses
+# Available defenses - Build dynamically based on what's available
 DEFENSES = {
     'none': ('No Defense', None),
     'input_sanitizer': ('Input Sanitizer', InputSanitizer()),
     'prompt_template': ('Prompt Template', PromptTemplate()),
     'output_filter': ('Output Filter', OutputFilter()),
     'context_isolation': ('Context Isolation', ContextIsolation()),
+    'instruction_hierarchy': ('Instruction Hierarchy', InstructionHierarchy()),
 }
+
+# Add ML-based defenses if available
+if PERPLEXITY_AVAILABLE and PerplexityFilter:
+    DEFENSES['perplexity_filter'] = ('Perplexity Filter (ML)', PerplexityFilter())
+
+if SEMANTIC_AVAILABLE and SemanticSimilarity:
+    DEFENSES['semantic_similarity'] = ('Semantic Similarity (ML)', SemanticSimilarity())
 
 
 @app.route('/')
@@ -118,7 +142,8 @@ def test_attack():
 @app.route('/comparison')
 def comparison():
     """Defense comparison page"""
-    return render_template('comparison.html', defenses=DEFENSES)
+    all_attacks = attack_engine.get_all_attacks()
+    return render_template('comparison.html', defenses=DEFENSES, attacks=all_attacks)
 
 
 @app.route('/api/compare-defenses', methods=['POST'])

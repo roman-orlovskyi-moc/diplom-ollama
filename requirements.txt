@@ -11,6 +11,11 @@ requests==2.31.0
 pandas==2.1.4
 numpy==1.26.3
 
+# ML-Based Defenses
+transformers>=4.35.0
+torch>=2.2.0
+sentence-transformers>=2.2.2
+
 # Visualization
 matplotlib==3.8.2
 plotly==5.18.0

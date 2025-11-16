@@ -13,15 +13,48 @@
                 <h5 class="mb-0">Select Attack to Compare</h5>
             </div>
             <div class="card-body">
-                <select class="form-select" id="compareAttackSelect">
-                    <option value="">Choose an attack...</option>
-                    <option value="di_001">[HIGH] Ignore Previous Instructions</option>
-                    <option value="jb_001">[CRITICAL] DAN (Do Anything Now)</option>
-                    <option value="rc_001">[CRITICAL] System Message Injection</option>
-                    <option value="de_001">[HIGH] Direct Prompt Extraction</option>
-                </select>
-                <button id="compareButton" class="btn btn-primary mt-3" disabled>
-                    <i class="bi bi-bar-chart"></i> Compare All Defenses
+                <!-- Filters -->
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label for="categoryFilter" class="form-label">Filter by Category:</label>
+                        <select class="form-select form-select-sm" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="adversarial_techniques">Adversarial Techniques</option>
+                            <option value="multi_turn">Multi-Turn Attacks</option>
+                            <option value="direct_injection">Direct Injection</option>
+                            <option value="jailbreak">Jailbreak</option>
+                            <option value="role_confusion">Role Confusion</option>
+                            <option value="context_switching">Context Switching</option>
+                            <option value="indirect_injection">Indirect Injection</option>
+                            <option value="data_extraction">Data Extraction</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="sortBy" class="form-label">Sort by:</label>
+                        <select class="form-select form-select-sm" id="sortBy">
+                            <option value="name">Name (A-Z)</option>
+                            <option value="severity">Severity (High to Low)</option>
+                            <option value="category">Category</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="text-muted">
+                            <span id="attackCount">0</span> attacks available
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attack Selection -->
+                <div class="mb-3">
+                    <label for="compareAttackSelect" class="form-label">Attack Pattern:</label>
+                    <select class="form-select" id="compareAttackSelect" size="6">
+                        <option value="">Choose an attack...</option>
+                    </select>
+                </div>
+
+                <button id="compareButton" class="btn btn-primary btn-lg w-100" disabled>
+                    <i class="bi bi-bar-chart"></i> Compare All Defenses ({{ defenses|length }} defenses)
                 </button>
             </div>
         </div>
@@ -71,6 +104,90 @@
 {% block extra_js %}
 <script>
 $(document).ready(function() {
+    // All attacks data
+    const allAttacks = [
+        {% for attack in attacks %}
+        {
+            id: '{{ attack.id }}',
+            name: '{{ attack.name }}',
+            category: '{{ attack.category }}',
+            severity: '{{ attack.severity }}'
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    const severityOrder = { 'critical': 0, 'high': 1, 'medium': 2, 'low': 3 };
+
+    // Function to populate attack dropdown
+    function populateAttacks() {
+        const categoryFilter = $('#categoryFilter').val();
+        const sortBy = $('#sortBy').val();
+
+        // Filter attacks
+        let filtered = allAttacks;
+        if (categoryFilter) {
+            filtered = allAttacks.filter(a => a.category === categoryFilter);
+        }
+
+        // Sort attacks
+        if (sortBy === 'name') {
+            filtered.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (sortBy === 'severity') {
+            filtered.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+        } else if (sortBy === 'category') {
+            filtered.sort((a, b) => {
+                const catCompare = a.category.localeCompare(b.category);
+                if (catCompare !== 0) return catCompare;
+                return severityOrder[a.severity] - severityOrder[b.severity];
+            });
+        }
+
+        // Clear and populate dropdown
+        const select = $('#compareAttackSelect');
+        select.empty();
+        select.append('<option value="">Choose an attack...</option>');
+
+        let currentCategory = null;
+        filtered.forEach(attack => {
+            // Add category optgroup if sorting by category
+            if (sortBy === 'category' && attack.category !== currentCategory) {
+                currentCategory = attack.category;
+                const categoryName = attack.category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                select.append(`<optgroup label="${categoryName}"></optgroup>`);
+            }
+
+            const severityBadge = `[${attack.severity.toUpperCase()}]`;
+            const option = $('<option></option>')
+                .val(attack.id)
+                .text(`${severityBadge} ${attack.name}`);
+
+            if (sortBy === 'category' && currentCategory) {
+                select.find('optgroup').last().append(option);
+            } else {
+                select.append(option);
+            }
+        });
+
+        // Update count
+        $('#attackCount').text(filtered.length);
+
+        // Check for URL parameter and pre-select
+        const urlParams = new URLSearchParams(window.location.search);
+        const attackParam = urlParams.get('attack');
+        if (attackParam && filtered.some(a => a.id === attackParam)) {
+            select.val(attackParam);
+            select.trigger('change');
+        }
+    }
+
+    // Initialize
+    populateAttacks();
+
+    // Filter/sort change handlers
+    $('#categoryFilter, #sortBy').change(function() {
+        populateAttacks();
+    });
+
     $('#compareAttackSelect').change(function() {
         $('#compareButton').prop('disabled', !$(this).val());
         $('#comparisonResults').hide();

@@ -17,17 +17,10 @@
             </div>
             <div class="col-md-6 text-end">
                 <a href="/attack/{{ attack.id }}" class="btn btn-sm btn-outline-primary">View Details</a>
-                <button class="btn btn-sm btn-primary test-attack-btn" data-attack-id="{{ attack.id }}">
+                <a href="/demo?attack={{ attack.id }}" class="btn btn-sm btn-primary">
                     <i class="bi bi-play"></i> Test
-                </button>
+                </a>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-$('.test-attack-btn').click(function() {
-    const attackId = $(this).data('attack-id');
-    window.location.href = '/demo?attack=' + attackId;
-});
-</script>
