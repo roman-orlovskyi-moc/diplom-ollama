@@ -32,8 +32,10 @@ from src.defenses.input_sanitizer import InputSanitizer
 from src.defenses.prompt_template import PromptTemplate
 from src.defenses.output_filter import OutputFilter
 from src.defenses.context_isolation import ContextIsolation
-from src.defenses.dual_llm import DualLLM
 from src.defenses.instruction_hierarchy import InstructionHierarchy
+from src.defenses.dual_llm import DualLLM
+from src.defenses.perplexity_filter import PerplexityFilter
+from src.defenses.semantic_similarity import SemanticSimilarity
 from config.settings import (
     OPENAI_API_KEY, ANTHROPIC_API_KEY,
     DEFAULT_OLLAMA_MODEL, DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL
@@ -81,6 +83,13 @@ def get_available_models():
 
 def get_defense_configurations():
     """Get all defense mechanisms to test"""
+
+    guardian_client = LLMClientFactory.create(
+        LLMProvider.OLLAMA,
+        base_url='http://localhost:11434',
+        model=DEFAULT_OLLAMA_MODEL
+    )
+
     return [
         ('NoDefense', None),
         ('InputSanitizer', InputSanitizer()),
@@ -89,6 +98,9 @@ def get_defense_configurations():
         ('OutputFilter', OutputFilter()),
         ('ContextIsolation', ContextIsolation()),
         ('InstructionHierarchy', InstructionHierarchy()),
+        ('PerplexityFilter', PerplexityFilter()),
+        ('SemanticSimilarity', SemanticSimilarity()),
+        ('DualLLM', DualLLM({'guardian_client': guardian_client}))
     ]
 
 
@@ -417,7 +429,7 @@ def main():
     attacks = attack_engine.get_all_attacks()
     print(f"\n5. Attack selection ({len(attacks)} total)")
     print("   Options:")
-    print("   1. All attacks (recommended for thesis)")
+    print("   1. All attacks")
     print("   2. Quick test (10 random attacks per category)")
 
     choice = input("   Choice (1-2): ").strip()
