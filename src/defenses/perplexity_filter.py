@@ -11,6 +11,7 @@ Approach: Uses a small pre-trained language model to calculate perplexity scores
 """
 from typing import Dict, Any, Optional
 from src.defenses import DefenseBase
+from config.settings import DEFAULT_PERPLEXITY_MODEL
 
 # Lazy import - only import torch when actually needed
 try:
@@ -42,7 +43,7 @@ class PerplexityFilter(DefenseBase):
 
         # Configuration
         self.threshold = config.get('threshold', 150) if config else 150
-        self.model_name = config.get('model_name', 'gpt2') if config else 'gpt2'
+        self.model_name = config.get('model_name', DEFAULT_PERPLEXITY_MODEL) if config else DEFAULT_PERPLEXITY_MODEL
         self.max_length = config.get('max_length', 512) if config else 512
         self.block_message = config.get('block_message',
             '[BLOCKED: Input appears to be encoded or obfuscated]') if config else \
@@ -59,11 +60,11 @@ class PerplexityFilter(DefenseBase):
             return
 
         try:
-            from transformers import GPT2LMHeadModel, GPT2Tokenizer
+            from transformers import AutoModelForCausalLM, AutoTokenizer
 
             print(f"Loading {self.model_name} for perplexity calculation...")
-            self.tokenizer = GPT2Tokenizer.from_pretrained(self.model_name)
-            self.model = GPT2LMHeadModel.from_pretrained(self.model_name)
+            self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            self.model = AutoModelForCausalLM.from_pretrained(self.model_name)
             self.model.eval()  # Set to evaluation mode
 
             # Add padding token if not present

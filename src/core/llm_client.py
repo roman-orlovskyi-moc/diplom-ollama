@@ -7,6 +7,13 @@ from typing import Optional, Dict, Any
 from enum import Enum
 import time
 
+# Import model name constants
+from config.settings import (
+    DEFAULT_OLLAMA_MODEL,
+    DEFAULT_OPENAI_MODEL,
+    DEFAULT_ANTHROPIC_MODEL
+)
+
 
 class LLMProvider(Enum):
     """Supported LLM providers"""
@@ -52,7 +59,7 @@ class LLMClient(ABC):
 class OllamaClient(LLMClient):
     """Client for local Ollama LLM"""
 
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = "llama3.2"):
+    def __init__(self, base_url: str = "http://localhost:11434", model: str = DEFAULT_OLLAMA_MODEL):
         self.base_url = base_url.rstrip('/')
         self.model = model
 
@@ -118,7 +125,7 @@ class OllamaClient(LLMClient):
 class OpenAIClient(LLMClient):
     """Client for OpenAI API"""
 
-    def __init__(self, api_key: str, model: str = "gpt-4"):
+    def __init__(self, api_key: str, model: str = DEFAULT_OPENAI_MODEL):
         self.api_key = api_key
         self.model = model
 
@@ -164,7 +171,13 @@ class OpenAIClient(LLMClient):
             tokens_used = response.usage.total_tokens
 
             # Rough cost estimation (update with actual pricing)
-            cost_per_1k_tokens = 0.03 if 'gpt-4' in self.model else 0.002
+            # GPT-4o pricing: $2.50 per 1M input tokens, $10 per 1M output tokens
+            if 'gpt-4o' in self.model or 'o1' in self.model:
+                cost_per_1k_tokens = 0.005  # Simplified average
+            elif 'gpt-4' in self.model:
+                cost_per_1k_tokens = 0.03
+            else:
+                cost_per_1k_tokens = 0.002
             cost = (tokens_used / 1000) * cost_per_1k_tokens
 
             return {
@@ -189,7 +202,7 @@ class OpenAIClient(LLMClient):
 class AnthropicClient(LLMClient):
     """Client for Anthropic Claude API"""
 
-    def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-20241022"):
+    def __init__(self, api_key: str, model: str = DEFAULT_ANTHROPIC_MODEL):
         self.api_key = api_key
         self.model = model
 
@@ -275,21 +288,21 @@ class LLMClientFactory:
         if provider == LLMProvider.OLLAMA:
             return OllamaClient(
                 base_url=config.get('base_url', 'http://localhost:11434'),
-                model=config.get('model', 'llama3.2')
+                model=config.get('model', DEFAULT_OLLAMA_MODEL)
             )
         elif provider == LLMProvider.OPENAI:
             if 'api_key' not in config:
                 raise ValueError("OpenAI requires api_key in config")
             return OpenAIClient(
                 api_key=config['api_key'],
-                model=config.get('model', 'gpt-4')
+                model=config.get('model', DEFAULT_OPENAI_MODEL)
             )
         elif provider == LLMProvider.ANTHROPIC:
             if 'api_key' not in config:
                 raise ValueError("Anthropic requires api_key in config")
             return AnthropicClient(
                 api_key=config['api_key'],
-                model=config.get('model', 'claude-3-5-sonnet-20241022')
+                model=config.get('model', DEFAULT_ANTHROPIC_MODEL)
             )
         else:
             raise ValueError(f"Unknown provider: {provider}")
