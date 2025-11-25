@@ -36,7 +36,7 @@ DEFAULT_PERPLEXITY_MODEL = 'distilgpt2'
 # LLM CONFIGURATION
 # ============================================================================
 LLM_PROVIDER = os.getenv('LLM_PROVIDER', 'ollama')
-OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+OLLAMA_BASE_URL = os.getenv('OLLAMA_BASE_URL', 'http://ollama:11434')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', DEFAULT_OLLAMA_MODEL)
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')

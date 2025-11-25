@@ -37,7 +37,7 @@ from src.defenses.dual_llm import DualLLM
 from src.defenses.perplexity_filter import PerplexityFilter
 from src.defenses.semantic_similarity import SemanticSimilarity
 from config.settings import (
-    OPENAI_API_KEY, ANTHROPIC_API_KEY,
+    OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_MODEL, DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL
 )
 
@@ -51,7 +51,7 @@ def get_available_models():
         'name': 'Llama3.2',
         'provider': LLMProvider.OLLAMA,
         'config': {
-            'base_url': 'http://localhost:11434',
+            'base_url': OLLAMA_BASE_URL,
             'model': DEFAULT_OLLAMA_MODEL
         }
     })
@@ -86,7 +86,7 @@ def get_defense_configurations():
 
     guardian_client = LLMClientFactory.create(
         LLMProvider.OLLAMA,
-        base_url='http://localhost:11434',
+        base_url=OLLAMA_BASE_URL,
         model=DEFAULT_OLLAMA_MODEL
     )
 

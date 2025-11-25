@@ -9,6 +9,7 @@ import time
 
 # Import model name constants
 from config.settings import (
+    OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_MODEL,
     DEFAULT_OPENAI_MODEL,
     DEFAULT_ANTHROPIC_MODEL
@@ -59,7 +60,7 @@ class LLMClient(ABC):
 class OllamaClient(LLMClient):
     """Client for local Ollama LLM"""
 
-    def __init__(self, base_url: str = "http://localhost:11434", model: str = DEFAULT_OLLAMA_MODEL):
+    def __init__(self, base_url: str = OLLAMA_BASE_URL, model: str = DEFAULT_OLLAMA_MODEL):
         self.base_url = base_url.rstrip('/')
         self.model = model
 
@@ -287,7 +288,7 @@ class LLMClientFactory:
         """
         if provider == LLMProvider.OLLAMA:
             return OllamaClient(
-                base_url=config.get('base_url', 'http://localhost:11434'),
+                base_url=config.get('base_url', OLLAMA_BASE_URL),
                 model=config.get('model', DEFAULT_OLLAMA_MODEL)
             )
         elif provider == LLMProvider.OPENAI:
