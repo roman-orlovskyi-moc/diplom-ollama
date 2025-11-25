@@ -221,7 +221,7 @@ $(document).ready(function() {
                             : '<span class="badge bg-success">BLOCKED</span>');
 
                     const latency = result.latency_ms ? result.latency_ms + ' ms' : 'N/A';
-                    const response = result.error || (result.response.substring(0, 100) + '...');
+                    const response = result.error || result.response;
 
                     tbody.append(`
                         <tr>
