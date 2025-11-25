@@ -16,121 +16,262 @@
             </p>
             <hr class="my-4">
             <p>
-                This framework implements <strong>{{ stats.total_attacks }}</strong> attack patterns across
-                <strong>{{ stats.categories|length }}</strong> categories with multiple defense mechanisms for
+                This framework implements <strong>{{ attack_stats.total_attacks }}</strong> attack patterns across
+                <strong>{{ attack_stats.categories|length }}</strong> categories with <strong>{{ defenses|length }}</strong> defense mechanisms for
                 comparative analysis.
             </p>
-            <div class="btn-group" role="group">
-                <a class="btn btn-primary btn-lg" href="/demo" role="button">
-                    <i class="bi bi-play-circle"></i> Try Demo
-                </a>
-                <a class="btn btn-success btn-lg" href="/attacks" role="button">
-                    <i class="bi bi-bug"></i> Browse Attacks
-                </a>
-                <a class="btn btn-info btn-lg" href="/comparison" role="button">
-                    <i class="bi bi-bar-chart"></i> Compare Defenses
+            <div class="text-center mt-4">
+                <a class="btn btn-primary btn-lg" href="/comparison" role="button">
+                    <i class="bi bi-bar-chart"></i> Test Defense Mechanisms
                 </a>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Dashboard Statistics -->
 <div class="row mt-5">
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-bug display-1 text-danger"></i>
-                <h3 class="card-title mt-3">{{ stats.total_attacks }}</h3>
-                <p class="card-text">Attack Patterns</p>
+    <div class="col-md-12">
+        <h2><i class="bi bi-graph-up"></i> Test Statistics</h2>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-clipboard-data display-4 text-primary"></i>
+                <h3 class="mt-2">{{ db_stats.total_tests }}</h3>
+                <p class="text-muted">Total Tests Run</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-shield-check display-1 text-success"></i>
-                <h3 class="card-title mt-3">5</h3>
-                <p class="card-text">Defense Mechanisms</p>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-x-circle display-4 text-danger"></i>
+                <h3 class="mt-2">{{ db_stats.successful_attacks }}</h3>
+                <p class="text-muted">Successful Attacks</p>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-body text-center">
-                <i class="bi bi-folder display-1 text-primary"></i>
-                <h3 class="card-title mt-3">{{ stats.categories|length }}</h3>
-                <p class="card-text">Attack Categories</p>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-bug display-4 text-warning"></i>
+                <h3 class="mt-2">{{ attack_stats.total_attacks }}</h3>
+                <p class="text-muted">Attack Patterns</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="bi bi-shield-check display-4 text-success"></i>
+                <h3 class="mt-2">{{ defenses|length }}</h3>
+                <p class="text-muted">Defense Mechanisms</p>
             </div>
         </div>
     </div>
 </div>
 
+{% if db_stats.total_tests > 0 %}
+<!-- Test Results by Defense and Category -->
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-shield"></i> Results by Defense</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Defense</th>
+                            <th>Tests</th>
+                            <th>Attack Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for defense, stats in db_stats.by_defense.items() %}
+                        <tr>
+                            <td>{{ defense }}</td>
+                            <td>{{ stats.total }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if stats.success_rate < 0.1 %}bg-success{% elif stats.success_rate < 0.3 %}bg-warning{% else %}bg-danger{% endif %}"
+                                         style="width: {{ stats.success_rate * 100 }}%">
+                                        {{ "%.1f"|format(stats.success_rate * 100) }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-folder"></i> Results by Category</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Tests</th>
+                            <th>Attack Success Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for category, stats in db_stats.by_category.items() %}
+                        <tr>
+                            <td>{{ category|replace('_', ' ')|title }}</td>
+                            <td>{{ stats.total }}</td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar {% if stats.success_rate < 0.1 %}bg-success{% elif stats.success_rate < 0.3 %}bg-warning{% else %}bg-danger{% endif %}"
+                                         style="width: {{ stats.success_rate * 100 }}%">
+                                        {{ "%.1f"|format(stats.success_rate * 100) }}%
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Attack Categories Overview -->
 <div class="row mt-5">
     <div class="col-md-12">
-        <h2>Attack Categories</h2>
-        <div class="row mt-3">
-            {% for category, count in stats.categories.items() %}
-            <div class="col-md-4 mb-3">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ category|replace('_', ' ')|title }}</h5>
-                        <p class="card-text"><strong>{{ count }}</strong> attacks</p>
-                        <a href="/attacks#{{ category }}" class="btn btn-sm btn-outline-primary">View</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
+        <h2><i class="bi bi-folder"></i> Attack Categories</h2>
+        <p class="text-muted">{{ attack_stats.total_attacks }} attack patterns across {{ attack_stats.categories|length }} categories</p>
     </div>
 </div>
 
+<div class="row mt-3">
+    {% for category, count in attack_stats.categories.items() %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-bug-fill text-danger"></i>
+                    {{ category|replace('_', ' ')|title }}
+                </h5>
+                <p class="card-text"><strong>{{ count }}</strong> attack{{ 's' if count != 1 else '' }}</p>
+                <p class="text-muted small">
+                    {% if category == 'direct_injection' %}
+                    Direct manipulation of LLM prompts
+                    {% elif category == 'jailbreak' %}
+                    Attempts to bypass content policies
+                    {% elif category == 'indirect_injection' %}
+                    Attacks via external data sources
+                    {% elif category == 'role_confusion' %}
+                    Manipulation of LLM role/context
+                    {% elif category == 'multi_turn' %}
+                    Attacks across conversation turns
+                    {% elif category == 'data_extraction' %}
+                    Attempts to leak sensitive data
+                    {% elif category == 'context_switching' %}
+                    Manipulation through context changes
+                    {% elif category == 'adversarial_techniques' %}
+                    Advanced evasion techniques
+                    {% else %}
+                    Prompt injection techniques
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Defense Mechanisms -->
 <div class="row mt-5">
     <div class="col-md-12">
-        <h2>Severity Distribution</h2>
-        <div class="row mt-3">
-            {% set severity_colors = {'critical': 'danger', 'high': 'warning', 'medium': 'info', 'low': 'secondary'} %}
-            {% for severity, count in stats.severity_distribution.items() %}
-            {% if count > 0 %}
-            <div class="col-md-3">
-                <div class="card border-{{ severity_colors[severity] }}">
-                    <div class="card-body text-center">
-                        <h5 class="card-title text-{{ severity_colors[severity] }}">{{ severity|title }}</h5>
-                        <h3>{{ count }}</h3>
-                        <small class="text-muted">attacks</small>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-            {% endfor %}
-        </div>
+        <h2><i class="bi bi-shield-check"></i> Defense Mechanisms</h2>
+        <p class="text-muted">{{ defenses|length }} implemented defense strategies</p>
     </div>
 </div>
 
-<div class="row mt-5">
-    <div class="col-md-12">
-        <h2>Defense Mechanisms</h2>
-        <div class="list-group mt-3">
-            <div class="list-group-item">
-                <h5><i class="bi bi-filter"></i> Input Sanitization</h5>
-                <p class="mb-0">Filters and removes dangerous patterns from user input using blocklists and regex.</p>
-            </div>
-            <div class="list-group-item">
-                <h5><i class="bi bi-box"></i> Prompt Templating</h5>
-                <p class="mb-0">Uses structured templates with delimiters to separate instructions from user data.</p>
-            </div>
-            <div class="list-group-item">
-                <h5><i class="bi bi-eye"></i> Output Filtering</h5>
-                <p class="mb-0">Scans LLM responses for leaked system prompts or sensitive information.</p>
-            </div>
-            <div class="list-group-item">
-                <h5><i class="bi bi-layers"></i> Context Isolation</h5>
-                <p class="mb-0">Separates user input from system context using XML-style tags.</p>
-            </div>
-            <div class="list-group-item">
-                <h5><i class="bi bi-shield-plus"></i> Dual-LLM Verification</h5>
-                <p class="mb-0">Uses a guardian model to verify inputs and outputs for attacks.</p>
+<div class="row mt-3">
+    {% for defense_key, (defense_label, defense_obj) in defenses.items() %}
+    <div class="col-md-6 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi {% if 'none' in defense_key %}bi-x-circle text-secondary{% elif 'input' in defense_key %}bi-filter text-primary{% elif 'template' in defense_key %}bi-box text-success{% elif 'output' in defense_key %}bi-eye text-info{% elif 'context' in defense_key %}bi-layers text-warning{% elif 'hierarchy' in defense_key %}bi-list-ol text-danger{% elif 'perplexity' in defense_key %}bi-cpu text-purple{% elif 'semantic' in defense_key %}bi-diagram-3 text-dark{% else %}bi-shield text-primary{% endif %}"></i>
+                    {{ defense_label }}
+                </h5>
+                <p class="card-text small">
+                    {% if 'none' in defense_key %}
+                    No protection - baseline for comparison
+                    {% elif 'input_sanitizer' in defense_key %}
+                    Filters dangerous patterns from user input using blocklists and regex
+                    {% elif 'prompt_template' in defense_key %}
+                    Uses structured templates with delimiters to separate instructions from user data
+                    {% elif 'output_filter' in defense_key %}
+                    Scans LLM responses for leaked system prompts or sensitive information
+                    {% elif 'context_isolation' in defense_key %}
+                    Separates user input from system context using XML-style tags
+                    {% elif 'instruction_hierarchy' in defense_key %}
+                    Establishes clear priority levels between system and user instructions
+                    {% elif 'perplexity' in defense_key %}
+                    ML-based detection of unusual input patterns
+                    {% elif 'semantic' in defense_key %}
+                    Compares input semantically against expected patterns
+                    {% else %}
+                    Advanced protection mechanism
+                    {% endif %}
+                </p>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
+
+<!-- Severity Distribution -->
+<div class="row mt-5">
+    <div class="col-md-12">
+        <h2><i class="bi bi-exclamation-triangle"></i> Severity Distribution</h2>
+    </div>
+</div>
+
+<div class="row mt-3">
+    {% set severity_colors = {'critical': 'danger', 'high': 'warning', 'medium': 'info', 'low': 'secondary'} %}
+    {% for severity, count in attack_stats.severity_distribution.items() %}
+    {% if count > 0 %}
+    <div class="col-md-3">
+        <div class="card border-{{ severity_colors[severity] }}">
+            <div class="card-body text-center">
+                <h5 class="card-title text-{{ severity_colors[severity] }}">{{ severity|title }}</h5>
+                <h3>{{ count }}</h3>
+                <small class="text-muted">attack{{ 's' if count != 1 else '' }}</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+
+{% if db_stats.total_tests == 0 %}
+<div class="row mt-5">
+    <div class="col-md-12">
+        <div class="alert alert-info text-center">
+            <i class="bi bi-info-circle display-4"></i>
+            <h4 class="mt-3">No test results yet</h4>
+            <p>Run some tests on the <a href="/comparison" class="alert-link">Test Defenses</a> page to see statistics and comparisons here.</p>
+        </div>
+    </div>
+</div>
+{% endif %}
 {% endblock %}

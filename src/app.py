@@ -74,69 +74,13 @@ if SEMANTIC_AVAILABLE and SemanticSimilarity:
 @app.route('/')
 def index():
     """Homepage"""
-    stats = attack_engine.get_statistics()
-    return render_template('index.html', stats=stats)
+    db_stats = db.get_statistics()
+    attack_stats = attack_engine.get_statistics()
 
-
-@app.route('/attacks')
-def attacks():
-    """Attack library page"""
-    all_attacks = attack_engine.get_all_attacks()
-    categories = attack_engine.get_categories()
-
-    return render_template('attacks.html',
-                         attacks=all_attacks,
-                         categories=categories)
-
-
-@app.route('/attack/<attack_id>')
-def attack_detail(attack_id):
-    """Single attack detail page"""
-    attack = attack_engine.get_attack_by_id(attack_id)
-    if not attack:
-        return "Attack not found", 404
-
-    return render_template('attack_detail.html', attack=attack)
-
-
-@app.route('/demo')
-def demo():
-    """Interactive demo page"""
-    attacks = attack_engine.get_all_attacks()
-    return render_template('demo.html',
-                         attacks=attacks,
+    return render_template('index.html',
+                         db_stats=db_stats,
+                         attack_stats=attack_stats,
                          defenses=DEFENSES)
-
-
-@app.route('/api/test-attack', methods=['POST'])
-def test_attack():
-    """API endpoint to test an attack"""
-    data = request.json
-    attack_id = data.get('attack_id')
-    defense_name = data.get('defense', 'none')
-
-    attack = attack_engine.get_attack_by_id(attack_id)
-    if not attack:
-        return jsonify({'error': 'Attack not found'}), 404
-
-    defense_label, defense = DEFENSES.get(defense_name, DEFENSES['none'])
-
-    try:
-        result = eval_engine.evaluate_attack(attack, defense)
-
-        return jsonify({
-            'success': True,
-            'attack_id': result.attack_id,
-            'attack_name': result.attack_name,
-            'defense_name': result.defense_name,
-            'attack_successful': result.attack_successful,
-            'response': result.response,
-            'latency_ms': result.latency_ms,
-            'tokens_used': result.tokens_used,
-            'cost': result.cost
-        })
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
 
 
 @app.route('/comparison')
@@ -177,27 +121,10 @@ def compare_defenses():
     return jsonify({'results': results})
 
 
-@app.route('/dashboard')
-def dashboard():
-    """Metrics dashboard"""
-    db_stats = db.get_statistics()
-    attack_stats = attack_engine.get_statistics()
-
-    return render_template('dashboard.html',
-                         db_stats=db_stats,
-                         attack_stats=attack_stats)
-
-
 @app.route('/api/stats')
 def api_stats():
     """API endpoint for statistics"""
     return jsonify(db.get_statistics())
-
-
-@app.route('/about')
-def about():
-    """About page"""
-    return render_template('about.html')
 
 
 if __name__ == '__main__':
