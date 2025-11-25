@@ -37,7 +37,7 @@ from src.defenses.dual_llm import DualLLM
 from src.defenses.perplexity_filter import PerplexityFilter
 from src.defenses.semantic_similarity import SemanticSimilarity
 from config.settings import (
-    OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_BASE_URL,
+    OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_BASE_URL, GUARDIAN_MODEL,
     DEFAULT_OLLAMA_MODEL, DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL
 )
 
@@ -87,14 +87,13 @@ def get_defense_configurations():
     guardian_client = LLMClientFactory.create(
         LLMProvider.OLLAMA,
         base_url=OLLAMA_BASE_URL,
-        model=DEFAULT_OLLAMA_MODEL
+        model=GUARDIAN_MODEL
     )
 
     return [
         ('NoDefense', None),
         ('InputSanitizer', InputSanitizer()),
-        ('PromptTemplate-Delimited', PromptTemplate({'template_style': 'delimited'})),
-        ('PromptTemplate-XML', PromptTemplate({'template_style': 'xml'})),
+        ('PromptTemplate', PromptTemplate()),
         ('OutputFilter', OutputFilter()),
         ('ContextIsolation', ContextIsolation()),
         ('InstructionHierarchy', InstructionHierarchy()),

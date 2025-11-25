@@ -20,6 +20,10 @@ BASE_DIR = Path(__file__).parent.parent
 # Ollama models (local)
 DEFAULT_OLLAMA_MODEL = 'llama3.2'
 
+# Guardian model
+GUARDIAN_MODEL = 'llama3.2'
+# Other options: 'llama3.2:1b', 'gemma2:2b', 'phi3:mini', 'qwen2.5:3b'
+
 # OpenAI models (API)
 DEFAULT_OPENAI_MODEL = 'gpt-4o'  # Latest GPT-4 Omni model
 # Other options: 'gpt-4', 'gpt-4-turbo', 'o1-preview', 'o1-mini'

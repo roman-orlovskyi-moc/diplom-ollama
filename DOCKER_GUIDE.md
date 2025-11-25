@@ -47,15 +47,22 @@ This will:
 - Build the application container
 - Set up networking between services
 
-### 2. Pull Ollama Model
+### 2. Pull Ollama Models
 
 ```bash
-# Execute command in Ollama container
+# Pull main model (required)
 docker compose exec ollama ollama pull llama3.2
 
-# Verify model is downloaded
+# Pull guardian model for DualLLM defense (recommended)
+docker compose exec ollama ollama pull gemma2:2b
+
+# Verify models are downloaded
 docker compose exec ollama ollama list
 ```
+
+**Models:**
+- `llama3.2` - Main LLM for processing requests (2.0 GB)
+- `gemma2:2b` - Guardian model for DualLLM defense (1.6 GB, optional but recommended)
 
 ### 3. Setup Database
 
@@ -237,8 +244,11 @@ docker compose exec app python scripts/run_simple_test.py
 # Start services
 docker compose up -d
 
-# Setup
+# Setup models
 docker compose exec ollama ollama pull llama3.2
+docker compose exec ollama ollama pull gemma2:2b  # For DualLLM defense
+
+# Setup database
 docker compose exec app python scripts/setup_db.py
 
 # Run experiments (interactive)
@@ -434,8 +444,9 @@ cd /opt/thesis-project
 # 2. Start services
 docker compose up -d
 
-# 3. Pull model
+# 3. Pull models
 docker compose exec ollama ollama pull llama3.2
+docker compose exec ollama ollama pull gemma2:2b  # For DualLLM defense
 
 # 4. Setup database
 docker compose exec app python scripts/setup_db.py
@@ -482,7 +493,9 @@ crontab -e
 ## Next Steps
 
 1. Start services: `docker compose up -d`
-2. Pull model: `docker compose exec ollama ollama pull llama3.2`
+2. Pull models:
+   - `docker compose exec ollama ollama pull llama3.2`
+   - `docker compose exec ollama ollama pull gemma2:2b` (for DualLLM)
 3. Run tests: `docker compose exec app python scripts/run_simple_test.py`
 4. View results: `ls -la data/exports/`
 
