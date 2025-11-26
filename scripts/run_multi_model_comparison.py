@@ -42,6 +42,50 @@ from config.settings import (
 )
 
 
+def get_sample_attacks(attack_engine, sample_size='balanced'):
+    """Get strategic sample of attacks"""
+    all_attacks = attack_engine.get_all_attacks()
+
+    if sample_size == 'balanced':  # 40 attacks
+        # 5 attacks per category, prioritizing high severity
+        categories = attack_engine.get_categories()
+        sample = []
+        for cat in categories:
+            cat_attacks = attack_engine.get_attacks_by_category(cat)
+            # Sort by severity
+            sorted_attacks = sorted(cat_attacks,
+                                   key=lambda x: {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}.get(x.severity, 4))
+            sample.extend(sorted_attacks[:5])
+        return sample
+
+    elif sample_size == 'strategic':  # 30 attacks
+        # Focus on severity
+        by_severity = {'critical': [], 'high': [], 'medium': [], 'low': []}
+        for attack in all_attacks:
+            by_severity[attack.severity].append(attack)
+
+        sample = []
+        sample.extend(by_severity['critical'][:5])
+        sample.extend(by_severity['high'][:10])
+        sample.extend(by_severity['medium'][:10])
+        sample.extend(by_severity['low'][:5])
+        return sample
+
+    elif sample_size == 'quick':  # 20 attacks
+        # 2-3 per category
+        categories = attack_engine.get_categories()
+        sample = []
+        for cat in categories:
+            cat_attacks = attack_engine.get_attacks_by_category(cat)
+            sorted_attacks = sorted(cat_attacks,
+                                   key=lambda x: {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}.get(x.severity, 4))
+            sample.extend(sorted_attacks[:3])
+        return sample[:20]
+
+    else:  # all
+        return all_attacks
+
+
 def get_available_models():
     """Check which models are available based on API keys"""
     models = []
@@ -424,25 +468,22 @@ def main():
             db.clear_all()
             print("   ✓ Database cleared")
 
-    # Attack selection
-    attacks = attack_engine.get_all_attacks()
-    print(f"\n5. Attack selection ({len(attacks)} total)")
-    print("   Options:")
-    print("   1. All attacks")
-    print("   2. Quick test (10 random attacks per category)")
+    # Attack selection with strategic sampling
+    all_attacks = attack_engine.get_all_attacks()
+    print(f"\n5. Attack selection ({len(all_attacks)} total)")
+    print("   Choose sample size:")
+    print("   1. Balanced (40 attacks) - 5 per category - Recommended for multi-model")
+    print("   2. Strategic (30 attacks) - By severity - Good balance")
+    print("   3. Quick (20 attacks) - Fast test - Basic coverage")
+    print("   4. All ({} attacks) - Full test - Maximum confidence".format(len(all_attacks)))
 
-    choice = input("   Choice (1-2): ").strip()
+    choice = input("\n   Choice (1-4): ").strip()
 
-    if choice == '2':
-        import random
-        # Get representative sample from each category
-        sample_attacks = []
-        for category in attack_engine.get_categories():
-            cat_attacks = attack_engine.get_attacks_by_category(category)
-            sample_size = min(10, len(cat_attacks))
-            sample_attacks.extend(random.sample(cat_attacks, sample_size))
-        attacks = sample_attacks
-        print(f"   ✓ Selected {len(attacks)} sample attacks")
+    sample_map = {'1': 'balanced', '2': 'strategic', '3': 'quick', '4': 'all'}
+    sample_type = sample_map.get(choice, 'balanced')
+
+    attacks = get_sample_attacks(attack_engine, sample_type)
+    print(f"   ✓ Selected {len(attacks)} attacks ({sample_type} mode)")
 
     # Calculate experiment size
     total_tests = len(attacks) * len(defenses) * len(available_models)
