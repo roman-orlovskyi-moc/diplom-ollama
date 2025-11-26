@@ -164,7 +164,7 @@ class OpenAIClient(LLMClient):
             response = client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                max_tokens=max_tokens,
+                max_completion_tokens=max_tokens,
                 temperature=temperature
             )
 
