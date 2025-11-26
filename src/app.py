@@ -19,6 +19,7 @@ from src.defenses.output_filter import OutputFilter
 from src.defenses.context_isolation import ContextIsolation
 from src.defenses.dual_llm import DualLLM
 from src.defenses.instruction_hierarchy import InstructionHierarchy
+from config.settings import (LLM_PROVIDER)
 
 # Try to import ML-based defenses (optional dependencies)
 try:
@@ -42,7 +43,7 @@ static_dir = project_root / 'src' / 'web' / 'static'
 app = Flask(__name__,
             template_folder=str(template_dir),
             static_folder=str(static_dir))
-app.config['SECRET_KEY'] = 'thesis_demo_key_2024'
+app.config['SECRET_KEY'] = 'thesis_demo_key'
 
 # Initialize components
 attack_engine = AttackEngine()
@@ -78,16 +79,20 @@ def index():
     attack_stats = attack_engine.get_statistics()
 
     return render_template('index.html',
-                         db_stats=db_stats,
-                         attack_stats=attack_stats,
-                         defenses=DEFENSES)
+                            llm_provider=LLM_PROVIDER,
+                            db_stats=db_stats,
+                            attack_stats=attack_stats,
+                            defenses=DEFENSES)
 
 
 @app.route('/comparison')
 def comparison():
     """Defense comparison page"""
     all_attacks = attack_engine.get_all_attacks()
-    return render_template('comparison.html', defenses=DEFENSES, attacks=all_attacks)
+    return render_template('comparison.html',
+                            llm_provider=LLM_PROVIDER,
+                            defenses=DEFENSES,
+                            attacks=all_attacks)
 
 
 @app.route('/api/compare-defenses', methods=['POST'])
