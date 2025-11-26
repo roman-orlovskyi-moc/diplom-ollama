@@ -5,7 +5,7 @@ Multi-Model Comparison - Comprehensive testing across Llama, GPT, and Claude
 This script tests all combinations of:
 - Attack methods (direct injection, jailbreak, etc.)
 - Defense mechanisms (sanitizer, templates, filters, etc.)
-- LLM models (Llama 3.2, GPT-4o, Claude Sonnet 4.5)
+- LLM models (Llama 3.2, GPT-5-mini, Claude Haiku 4.5)
 
 Generates comprehensive comparison tables with:
 - Attack Success Rate (ASR)
@@ -103,7 +103,7 @@ def get_available_models():
     # Check OpenAI
     if OPENAI_API_KEY:
         models.append({
-            'name': 'GPT-4o',
+            'name': 'GPT-5-mini',
             'provider': LLMProvider.OPENAI,
             'config': {
                 'api_key': OPENAI_API_KEY,
@@ -114,7 +114,7 @@ def get_available_models():
     # Check Anthropic
     if ANTHROPIC_API_KEY:
         models.append({
-            'name': 'Claude-Sonnet-4.5',
+            'name': 'Claude-Haiku-4.5',
             'provider': LLMProvider.ANTHROPIC,
             'config': {
                 'api_key': ANTHROPIC_API_KEY,
@@ -504,7 +504,7 @@ def main():
             tests_per_model = len(attacks) * len(defenses)
             est_tokens = tests_per_model * 500  # ~500 tokens per test
             if 'gpt' in model['name'].lower():
-                est_cost = (est_tokens / 1000) * 0.005  # GPT-4o avg cost
+                est_cost = (est_tokens / 1000) * 0.005  # GPT-5-mini avg cost
             else:
                 est_cost = (est_tokens / 1000) * 0.009  # Claude avg cost
             print(f"      {model['name']}: ~${est_cost:.2f}")

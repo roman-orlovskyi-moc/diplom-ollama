@@ -201,28 +201,6 @@ DATABASE_PATH=/app/data/results/test_results.db
 LOG_LEVEL=INFO
 ```
 
-## Using Different LLM Providers
-
-### OpenAI (GPT)
-
-```yaml
-# In docker-compose.yml, modify app environment:
-environment:
-  - LLM_PROVIDER=openai
-  - OPENAI_API_KEY=your-api-key-here
-  - OPENAI_MODEL=gpt-4
-```
-
-### Anthropic (Claude)
-
-```yaml
-# In docker-compose.yml, modify app environment:
-environment:
-  - LLM_PROVIDER=anthropic
-  - ANTHROPIC_API_KEY=your-api-key-here
-  - ANTHROPIC_MODEL=claude-3-5-sonnet-20241022
-```
-
 ## Common Workflows
 
 ### Workflow 1: Quick Test
