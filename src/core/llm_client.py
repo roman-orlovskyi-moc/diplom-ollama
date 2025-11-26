@@ -102,13 +102,25 @@ class OllamaClient(LLMClient):
             response.raise_for_status()
             data = response.json()
 
+            tokens_used = data.get('eval_count', 0)
             latency_ms = int((time.time() - start_time) * 1000)
+            cost = 0.0
+
+            response_content = data.get('response', '')
+
+            # Debug
+            print(f"[Ollama] Model: {self.model}")
+            print(f"[Ollama] Response content: {response_content}")
+            print(f"[Ollama] Tokens used: {tokens_used}")
+            print(f"[Ollama] Cost: {cost}")
+            print(f"[Ollama] Latency (ms): {latency_ms}")
+            print(f"{'='*80}")
 
             return {
-                'response': data.get('response', ''),
+                'response': response_content,
                 'model': self.model,
-                'tokens_used': data.get('eval_count', 0),
-                'cost': 0.0,  # Ollama is free/local
+                'tokens_used': tokens_used,
+                'cost': cost,
                 'latency_ms': latency_ms
             }
 
