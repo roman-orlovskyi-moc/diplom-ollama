@@ -1,0 +1,94 @@
+{
+  "total_tests": 1080,
+  "successful_attacks": 107,
+  "overall_success_rate": 0.09907407407407408,
+  "by_defense": {
+    "ContextIsolation": {
+      "total": 120,
+      "successful": 6,
+      "success_rate": 0.05
+    },
+    "DualLLM": {
+      "total": 120,
+      "successful": 2,
+      "success_rate": 0.016666666666666666
+    },
+    "InputSanitizer": {
+      "total": 120,
+      "successful": 16,
+      "success_rate": 0.13333333333333333
+    },
+    "InstructionHierarchy": {
+      "total": 120,
+      "successful": 9,
+      "success_rate": 0.075
+    },
+    "OutputFilter": {
+      "total": 120,
+      "successful": 15,
+      "success_rate": 0.125
+    },
+    "PerplexityFilter": {
+      "total": 120,
+      "successful": 11,
+      "success_rate": 0.09166666666666666
+    },
+    "PromptTemplate": {
+      "total": 120,
+      "successful": 20,
+      "success_rate": 0.16666666666666666
+    },
+    "SemanticSimilarity": {
+      "total": 120,
+      "successful": 18,
+      "success_rate": 0.15
+    },
+    "none": {
+      "total": 120,
+      "successful": 10,
+      "success_rate": 0.08333333333333333
+    }
+  },
+  "by_category": {
+    "adversarial_techniques": {
+      "total": 135,
+      "successful": 10,
+      "success_rate": 0.07407407407407407
+    },
+    "context_switching": {
+      "total": 135,
+      "successful": 20,
+      "success_rate": 0.14814814814814814
+    },
+    "data_extraction": {
+      "total": 135,
+      "successful": 31,
+      "success_rate": 0.22962962962962963
+    },
+    "direct_injection": {
+      "total": 135,
+      "successful": 9,
+      "success_rate": 0.06666666666666667
+    },
+    "indirect_injection": {
+      "total": 135,
+      "successful": 21,
+      "success_rate": 0.15555555555555556
+    },
+    "jailbreak": {
+      "total": 135,
+      "successful": 9,
+      "success_rate": 0.06666666666666667
+    },
+    "multi_turn": {
+      "total": 135,
+      "successful": 3,
+      "success_rate": 0.022222222222222223
+    },
+    "role_confusion": {
+      "total": 135,
+      "successful": 4,
+      "success_rate": 0.02962962962962963
+    }
+  }
+}
