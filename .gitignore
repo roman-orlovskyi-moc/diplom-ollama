@@ -49,8 +49,6 @@ logs/
 
 # Results
 data/results/*.db
-data/exports/*.csv
-data/exports/visualizations/*.png
 
 # OS
 .DS_Store

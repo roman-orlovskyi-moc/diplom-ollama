@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Generate Report - Create visualizations and analysis for thesis
+Generate Report - Create visualizations and analysis
 """
 import sys
 from pathlib import Path
@@ -208,7 +208,7 @@ def generate_visualizations(db: Database):
 def main():
     """Generate comprehensive report"""
     print("=" * 80)
-    print("THESIS REPORT GENERATION")
+    print("REPORT GENERATION")
     print("=" * 80)
 
     # Initialize database
@@ -266,7 +266,6 @@ def main():
     print("  - data/exports/category_analysis.md")
     print("  - data/exports/experiment_results.csv")
     print("  - data/exports/visualizations/*.png")
-    print("\nThese files are ready to include in your thesis!")
 
     db.close()
     return 0

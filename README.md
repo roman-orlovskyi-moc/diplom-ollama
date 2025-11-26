@@ -103,7 +103,7 @@ diplom/
 # Run full experiment suite
 python scripts/run_experiments.py
 
-# Generate thesis report
+# Generate report
 python scripts/generate_report.py
 ```
 
@@ -124,7 +124,3 @@ python scripts/generate_report.py
 4. Context Switching (10+ examples)
 5. Indirect Injection (5+ examples)
 6. Data Extraction (5+ examples)
-
-## License
-
-Academic use for thesis research.

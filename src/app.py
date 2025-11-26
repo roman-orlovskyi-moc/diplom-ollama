@@ -10,16 +10,21 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from src.core.attack_engine import AttackEngine
-from src.core.llm_client import LLMClientFactory
+from src.core.llm_client import LLMClientFactory, LLMProvider
 from src.core.evaluation import EvaluationEngine
 from src.utils.database import Database
+from src.utils.rate_limiter import RateLimiter
 from src.defenses.input_sanitizer import InputSanitizer
 from src.defenses.prompt_template import PromptTemplate
 from src.defenses.output_filter import OutputFilter
 from src.defenses.context_isolation import ContextIsolation
 from src.defenses.dual_llm import DualLLM
 from src.defenses.instruction_hierarchy import InstructionHierarchy
-from config.settings import (LLM_PROVIDER)
+from config.settings import (
+    LLM_PROVIDER,
+    OPENAI_TPM_LIMIT,
+    ANTHROPIC_TPM_LIMIT
+)
 
 # Try to import ML-based defenses (optional dependencies)
 try:
@@ -53,6 +58,17 @@ llm_client = LLMClientFactory.create_from_env()
 db = Database()
 db.create_tables()  # Ensure database tables are created
 eval_engine = EvaluationEngine(llm_client, db)
+
+# Initialize rate limiter based on current LLM provider
+rate_limiter = None
+if LLM_PROVIDER == 'openai':
+    rate_limiter = RateLimiter(OPENAI_TPM_LIMIT)
+    print(f"[Web UI] Rate limiter enabled for OpenAI: {OPENAI_TPM_LIMIT:,} TPM")
+elif LLM_PROVIDER == 'anthropic':
+    rate_limiter = RateLimiter(ANTHROPIC_TPM_LIMIT)
+    print(f"[Web UI] Rate limiter enabled for Anthropic: {ANTHROPIC_TPM_LIMIT:,} TPM")
+else:
+    print(f"[Web UI] No rate limiting for {LLM_PROVIDER} (local/unlimited)")
 
 # Available defenses - Build dynamically based on what's available
 DEFENSES = {
@@ -108,7 +124,16 @@ def compare_defenses():
     results = []
     for defense_key, (defense_label, defense) in DEFENSES.items():
         try:
+            # Apply rate limiting for API providers
+            if rate_limiter:
+                rate_limiter.wait_if_needed(estimated_tokens=1000)
+
             result = eval_engine.evaluate_attack(attack, defense)
+
+            # Record actual token usage
+            if rate_limiter:
+                rate_limiter.record_usage(result.tokens_used)
+
             results.append({
                 'defense_key': defense_key,
                 'defense_name': defense_label,

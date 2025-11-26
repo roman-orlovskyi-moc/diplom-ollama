@@ -28,6 +28,7 @@ from src.core.attack_engine import AttackEngine
 from src.core.llm_client import LLMClientFactory, LLMProvider
 from src.core.evaluation import EvaluationEngine
 from src.utils.database import Database
+from src.utils.rate_limiter import RateLimiter
 from src.defenses.input_sanitizer import InputSanitizer
 from src.defenses.prompt_template import PromptTemplate
 from src.defenses.output_filter import OutputFilter
@@ -38,7 +39,8 @@ from src.defenses.perplexity_filter import PerplexityFilter
 from src.defenses.semantic_similarity import SemanticSimilarity
 from config.settings import (
     OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_BASE_URL, GUARDIAN_MODEL,
-    DEFAULT_OLLAMA_MODEL, DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL
+    DEFAULT_OLLAMA_MODEL, DEFAULT_OPENAI_MODEL, DEFAULT_ANTHROPIC_MODEL,
+    OPENAI_TPM_LIMIT, ANTHROPIC_TPM_LIMIT
 )
 
 
@@ -425,7 +427,7 @@ def print_conclusions(all_results):
 
 def main():
     """Run multi-model comparison"""
-    print_section("MULTI-MODEL DEFENSE COMPARISON FOR THESIS")
+    print_section("MULTI-MODEL DEFENSE COMPARISON")
 
     # Check available models
     print("\n1. Checking available models...")
@@ -535,6 +537,13 @@ def main():
             print(f"✗ Error connecting to {model_name}: {e}")
             continue
 
+        # Initialize rate limiter for API models
+        rate_limiter = None
+        if model_info['provider'] == LLMProvider.OPENAI:
+            rate_limiter = RateLimiter(OPENAI_TPM_LIMIT)
+        elif model_info['provider'] == LLMProvider.ANTHROPIC:
+            rate_limiter = RateLimiter(ANTHROPIC_TPM_LIMIT)
+
         # Initialize evaluation engine
         eval_engine = EvaluationEngine(client, db)
 
@@ -549,8 +558,16 @@ def main():
                      unit="attack") as pbar:
                 for attack in attacks:
                     try:
+                        # Apply rate limiting for API models
+                        if rate_limiter:
+                            rate_limiter.wait_if_needed(estimated_tokens=1000)
+
                         result = eval_engine.evaluate_attack(attack, defense)
                         results.append(result)
+
+                        # Record actual token usage for rate limiting
+                        if rate_limiter:
+                            rate_limiter.record_usage(result.tokens_used)
 
                         successful = sum(1 for r in results if r.attack_successful)
                         asr = (successful / len(results)) * 100
@@ -594,11 +611,9 @@ def main():
     print(f"  1. {csv_path}")
     print(f"  2. {json_path}")
     print(f"  3. {db_csv}")
-    print("\nNext steps for thesis:")
-    print("  1. Use CSV files to create tables in your thesis")
-    print("  2. Generate visualizations: python scripts/generate_report.py")
-    print("  3. Analyze category-specific performance")
-    print("  4. Document cost-effectiveness trade-offs")
+    print("\nNext steps:")
+    print("  1. Generate visualizations: python scripts/generate_report.py")
+    print("  2. Analyze category-specific performance")
 
     db.close()
     return 0
