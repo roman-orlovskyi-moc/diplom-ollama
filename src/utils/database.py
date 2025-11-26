@@ -117,34 +117,6 @@ class Database:
 
         return results
 
-    def get_results_by_defense(self, defense_name: str) -> List[TestResult]:
-        """Get all results for a specific defense"""
-        cursor = self.conn.cursor()
-        cursor.execute(
-            "SELECT * FROM test_results WHERE defense_name = ? ORDER BY timestamp DESC",
-            (defense_name,)
-        )
-
-        results = []
-        for row in cursor.fetchall():
-            results.append(self._row_to_result(row))
-
-        return results
-
-    def get_results_by_attack(self, attack_id: str) -> List[TestResult]:
-        """Get all results for a specific attack"""
-        cursor = self.conn.cursor()
-        cursor.execute(
-            "SELECT * FROM test_results WHERE attack_id = ? ORDER BY timestamp DESC",
-            (attack_id,)
-        )
-
-        results = []
-        for row in cursor.fetchall():
-            results.append(self._row_to_result(row))
-
-        return results
-
     def get_results_by_category(self, category: str) -> List[TestResult]:
         """Get all results for a specific attack category"""
         cursor = self.conn.cursor()
