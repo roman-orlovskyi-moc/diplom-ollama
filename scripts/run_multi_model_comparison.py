@@ -361,6 +361,41 @@ def print_comparison_tables(all_results):
             f"{models_count}"
         )
 
+    # Table 5: Top 5 Most Successful Attacks by Model
+    print_subsection("Table 5: Top 5 Most Successful Attacks by Name (Per Model)")
+
+    for model_name, model_results in all_results.items():
+        print(f"\n{model_name}:")
+        print(f"{'Attack Name':<50} {'Success Rate':<15} {'Successful/Total'}")
+        print("-" * 80)
+
+        # Aggregate all results across all defenses for this model
+        attack_stats = {}
+        for defense_name, results in model_results.items():
+            for result in results:
+                attack_name = result.attack_name
+                if attack_name not in attack_stats:
+                    attack_stats[attack_name] = {'total': 0, 'successful': 0}
+                attack_stats[attack_name]['total'] += 1
+                if result.attack_successful:
+                    attack_stats[attack_name]['successful'] += 1
+
+        # Calculate success rate and sort
+        attack_success_rates = []
+        for attack_name, stats in attack_stats.items():
+            success_rate = (stats['successful'] / stats['total'] * 100) if stats['total'] > 0 else 0
+            attack_success_rates.append((attack_name, success_rate, stats['successful'], stats['total']))
+
+        # Sort by success rate (descending) and take top 5
+        top_attacks = sorted(attack_success_rates, key=lambda x: (-x[1], -x[2]))[:5]
+
+        for attack_name, success_rate, successful, total in top_attacks:
+            print(
+                f"{attack_name:<50} "
+                f"{success_rate:>6.1f}%        "
+                f"{successful}/{total}"
+            )
+
 
 def print_conclusions(all_results):
     """Generate and print conclusions from the data"""

@@ -117,6 +117,151 @@ def generate_category_analysis(db: Database):
     print(f"  ✓ Saved to {output_path}")
 
 
+def generate_defense_per_model_report(db: Database):
+    """Generate report on best defense per model"""
+    print("\nGenerating defense per model report...")
+
+    # Get all results
+    all_results = db.get_all_results()
+    if not all_results:
+        print("  ⚠ No results found")
+        return
+
+    # Group results by model
+    by_model = {}
+    for result in all_results:
+        model = result.model
+        if model not in by_model:
+            by_model[model] = {}
+
+        defense = result.defense_name
+        if defense not in by_model[model]:
+            by_model[model][defense] = {'total': 0, 'successful': 0}
+
+        by_model[model][defense]['total'] += 1
+        if result.attack_successful:
+            by_model[model][defense]['successful'] += 1
+
+    # Create markdown report
+    output_path = Path('data/exports/best_defense_per_model.md')
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, 'w') as f:
+        f.write("# Best Defense Mechanism Per Model\n\n")
+        f.write("This report shows the most effective defense for each model.\n\n")
+
+        for model, defenses in sorted(by_model.items()):
+            f.write(f"## {model}\n\n")
+
+            # Calculate success rates for each defense
+            defense_stats = []
+            for defense, stats in defenses.items():
+                success_rate = (stats['successful'] / stats['total']) if stats['total'] > 0 else 0
+                effectiveness = 1 - success_rate
+                defense_stats.append({
+                    'name': defense,
+                    'total': stats['total'],
+                    'successful': stats['successful'],
+                    'success_rate': success_rate,
+                    'effectiveness': effectiveness
+                })
+
+            # Sort by effectiveness (best first)
+            defense_stats.sort(key=lambda x: x['effectiveness'], reverse=True)
+
+            # Write table
+            f.write("| Defense | Total Tests | Successful Attacks | ASR | DER |\n")
+            f.write("|---------|-------------|-------------------|-----|-----|\n")
+
+            for d_stat in defense_stats:
+                f.write(
+                    f"| {d_stat['name']} | {d_stat['total']} | {d_stat['successful']} | "
+                    f"{d_stat['success_rate']*100:.1f}% | {d_stat['effectiveness']*100:.1f}% |\n"
+                )
+
+            # Highlight best defense
+            if defense_stats:
+                best = defense_stats[0]
+                f.write(f"\n**Best Defense:** {best['name']} with {best['effectiveness']*100:.1f}% effectiveness\n\n")
+
+            f.write("---\n\n")
+
+    print(f"  ✓ Saved to {output_path}")
+
+
+def generate_attack_success_per_model_report(db: Database):
+    """Generate report on most successful attacks by model (not category)"""
+    print("\nGenerating most successful attacks per model report...")
+
+    # Get all results
+    all_results = db.get_all_results()
+    if not all_results:
+        print("  ⚠ No results found")
+        return
+
+    # Group results by model and attack name
+    by_model = {}
+    for result in all_results:
+        model = result.model
+        if model not in by_model:
+            by_model[model] = {}
+
+        attack_name = result.attack_name
+        if attack_name not in by_model[model]:
+            by_model[model][attack_name] = {
+                'total': 0,
+                'successful': 0,
+                'category': result.attack_category,
+                'severity': result.attack_severity
+            }
+
+        by_model[model][attack_name]['total'] += 1
+        if result.attack_successful:
+            by_model[model][attack_name]['successful'] += 1
+
+    # Create markdown report
+    output_path = Path('data/exports/most_successful_attacks_per_model.md')
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with open(output_path, 'w') as f:
+        f.write("# Most Successful Attacks Per Model\n\n")
+        f.write("This report shows the top attacks by success rate for each model.\n\n")
+
+        for model, attacks in sorted(by_model.items()):
+            f.write(f"## {model}\n\n")
+
+            # Calculate success rates for each attack
+            attack_stats = []
+            for attack_name, stats in attacks.items():
+                success_rate = (stats['successful'] / stats['total']) if stats['total'] > 0 else 0
+                attack_stats.append({
+                    'name': attack_name,
+                    'category': stats['category'],
+                    'severity': stats['severity'],
+                    'total': stats['total'],
+                    'successful': stats['successful'],
+                    'success_rate': success_rate
+                })
+
+            # Sort by success rate (highest first)
+            attack_stats.sort(key=lambda x: (-x['success_rate'], -x['successful']))
+
+            # Write table for top 10 attacks
+            f.write("### Top 10 Most Successful Attacks\n\n")
+            f.write("| Attack Name | Category | Severity | Success Rate | Successful/Total |\n")
+            f.write("|-------------|----------|----------|--------------|------------------|\n")
+
+            for a_stat in attack_stats[:10]:
+                f.write(
+                    f"| {a_stat['name']} | {a_stat['category']} | {a_stat['severity']} | "
+                    f"{a_stat['success_rate']*100:.1f}% | {a_stat['successful']}/{a_stat['total']} |\n"
+                )
+
+            f.write("\n---\n\n")
+
+    print(f"  ✓ Saved to {output_path}")
+
+
 def generate_visualizations(db: Database):
     """Generate visualizations using matplotlib"""
     print("\nGenerating visualizations...")
@@ -228,6 +373,8 @@ def main():
     summary = generate_summary_stats(db)
     generate_comparison_table(db)
     generate_category_analysis(db)
+    generate_defense_per_model_report(db)
+    generate_attack_success_per_model_report(db)
     generate_visualizations(db)
 
     # Print summary
@@ -264,6 +411,8 @@ def main():
     print("  - data/exports/summary_statistics.json")
     print("  - data/exports/defense_comparison.md")
     print("  - data/exports/category_analysis.md")
+    print("  - data/exports/best_defense_per_model.md")
+    print("  - data/exports/most_successful_attacks_per_model.md")
     print("  - data/exports/experiment_results.csv")
     print("  - data/exports/visualizations/*.png")
 
