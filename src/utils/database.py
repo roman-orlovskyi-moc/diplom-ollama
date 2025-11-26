@@ -246,7 +246,7 @@ class Database:
                     row['latency_ms'],
                     row['tokens_used'],
                     row['cost'],
-                    row.get('model', 'unknown'),
+                    row['model'],
                     row['timestamp']
                 ])
 
@@ -271,7 +271,7 @@ class Database:
             latency_ms=row['latency_ms'],
             tokens_used=row['tokens_used'],
             cost=row['cost'],
-            model=row.get('model', 'unknown'),
+            model=row['model'],
             timestamp=row['timestamp'],
             metadata=metadata
         )
