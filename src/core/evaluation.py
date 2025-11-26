@@ -77,10 +77,10 @@ class EvaluationEngine:
             attack_successful=attack_successful,
             response=response,
             latency_ms=latency_ms,
+            model=result.get('model', 'unknown'),
             tokens_used=result.get('tokens_used', 0),
             cost=result.get('cost', 0.0),
             metadata={
-                'model': result.get('model'),
                 'original_response': original_response,
                 'response_modified': response != original_response
             }

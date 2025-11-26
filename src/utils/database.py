@@ -47,6 +47,7 @@ class Database:
                 latency_ms INTEGER NOT NULL,
                 tokens_used INTEGER NOT NULL,
                 cost REAL NOT NULL,
+                model TEXT NOT NULL,
                 timestamp REAL NOT NULL,
                 metadata TEXT
             )
@@ -84,8 +85,8 @@ class Database:
             INSERT INTO test_results (
                 attack_id, attack_name, attack_category, attack_severity,
                 defense_name, attack_successful, response, latency_ms,
-                tokens_used, cost, timestamp, metadata
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                tokens_used, cost, model, timestamp, metadata
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             result.attack_id,
             result.attack_name,
@@ -97,6 +98,7 @@ class Database:
             result.latency_ms,
             result.tokens_used,
             result.cost,
+            result.model,
             result.timestamp,
             json.dumps(result.metadata)
         ))
@@ -229,7 +231,7 @@ class Database:
             writer.writerow([
                 'attack_id', 'attack_name', 'attack_category', 'attack_severity',
                 'defense_name', 'attack_successful', 'latency_ms', 'tokens_used',
-                'cost', 'timestamp'
+                'cost', 'model', 'timestamp'
             ])
 
             # Data
@@ -244,6 +246,7 @@ class Database:
                     row['latency_ms'],
                     row['tokens_used'],
                     row['cost'],
+                    row.get('model', 'unknown'),
                     row['timestamp']
                 ])
 
@@ -268,6 +271,7 @@ class Database:
             latency_ms=row['latency_ms'],
             tokens_used=row['tokens_used'],
             cost=row['cost'],
+            model=row.get('model', 'unknown'),
             timestamp=row['timestamp'],
             metadata=metadata
         )

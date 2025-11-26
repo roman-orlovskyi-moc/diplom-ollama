@@ -19,6 +19,7 @@ class TestResult:
     latency_ms: int
     tokens_used: int
     cost: float
+    model: str
     timestamp: float
     metadata: Dict[str, Any]
 
@@ -33,6 +34,7 @@ class TestResult:
         attack_successful: bool,
         response: str,
         latency_ms: int,
+        model: str = 'unknown',
         tokens_used: int = 0,
         cost: float = 0.0,
         metadata: Dict[str, Any] = None
@@ -49,6 +51,7 @@ class TestResult:
             latency_ms=latency_ms,
             tokens_used=tokens_used,
             cost=cost,
+            model=model,
             timestamp=time.time(),
             metadata=metadata or {}
         )
