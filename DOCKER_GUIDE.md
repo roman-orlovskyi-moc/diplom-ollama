@@ -27,8 +27,11 @@ This will:
 # Pull main model (required)
 docker compose exec ollama ollama pull llama3.2
 
-# Pull guardian model for DualLLM defense (recommended)
+# Pull guardian model for DualLLM defense
 docker compose exec ollama ollama pull llama3.2:1b
+
+# Pull guardian model for LLM-based evaluation
+docker compose exec ollama ollama pull gemma3:1b
 
 # Verify models are downloaded
 docker compose exec ollama ollama list
@@ -37,6 +40,7 @@ docker compose exec ollama ollama list
 **Models:**
 - `llama3.2` - Main LLM for processing requests
 - `llama3.2:1b` - Guardian model for DualLLM defense
+- `gemma3:1b` - Judge model (for evaluating attack success/failure)
 
 ### 3. Setup Database
 
@@ -162,7 +166,8 @@ docker compose up -d
 
 # Setup models
 docker compose exec ollama ollama pull llama3.2
-docker compose exec ollama ollama pull llama3.2:1b  # For DualLLM defense
+docker compose exec ollama ollama pull llama3.2:1b
+docker compose exec ollama ollama pull gemma3:1b
 
 # Setup database
 docker compose exec app python scripts/setup_db.py

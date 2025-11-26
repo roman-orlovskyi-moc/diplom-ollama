@@ -24,6 +24,13 @@ DEFAULT_OLLAMA_MODEL = 'llama3.2'
 GUARDIAN_MODEL = 'llama3.2:1b'
 # Other options: 'llama3.2', 'gemma3:1b'
 
+# Judge model (for evaluating attack success/failure)
+JUDGE_MODEL = 'gemma3:1b'
+# Other options: 'llama3.2', 'gemma3:4b'
+
+# Enable LLM-based evaluation (more accurate but adds ~1-2 seconds per test)
+USE_LLM_JUDGE = os.getenv('USE_LLM_JUDGE', 'False').lower() == 'true'
+
 # OpenAI models (API)
 DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
 
