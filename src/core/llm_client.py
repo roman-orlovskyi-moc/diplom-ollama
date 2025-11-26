@@ -171,15 +171,7 @@ class OpenAIClient(LLMClient):
             latency_ms = int((time.time() - start_time) * 1000)
             tokens_used = response.usage.total_tokens
 
-            # Extract response content
             response_content = response.choices[0].message.content
-
-            # Debug
-            print(f"[OpenAI] Model: {self.model}")
-            print(f"[OpenAI] Response content: {response_content}")
-            print(f"[OpenAI] Tokens used: {tokens_used}")
-            print(f"[OpenAI] Latency (ms): {latency_ms}")
-            print(f"{'='*80}")
 
             # Rough cost estimation
             if 'gpt-5-nano' in self.model:
@@ -190,8 +182,16 @@ class OpenAIClient(LLMClient):
                 cost_per_1k_tokens = 0.002
             cost = (tokens_used / 1000) * cost_per_1k_tokens
 
+            # Debug
+            print(f"[OpenAI] Model: {self.model}")
+            print(f"[OpenAI] Response content: {response_content}")
+            print(f"[OpenAI] Tokens used: {tokens_used}")
+            print(f"[OpenAI] Cost: {cost}")
+            print(f"[OpenAI] Latency (ms): {latency_ms}")
+            print(f"{'='*80}")
+
             return {
-                'response': response_content or "",  # Ensure not None
+                'response': response_content or "",
                 'model': self.model,
                 'tokens_used': tokens_used,
                 'cost': cost,
@@ -255,14 +255,24 @@ class AnthropicClient(LLMClient):
             latency_ms = int((time.time() - start_time) * 1000)
             tokens_used = response.usage.input_tokens + response.usage.output_tokens
 
+            response_content = response.content[0].text
+
             # Rough cost estimation
-            cost_per_1k_input = 0.003
-            cost_per_1k_output = 0.015
+            cost_per_1k_input = 0.0001
+            cost_per_1k_output = 0.0005
             cost = (response.usage.input_tokens / 1000) * cost_per_1k_input + \
                    (response.usage.output_tokens / 1000) * cost_per_1k_output
 
+            # Debug
+            print(f"[Anthropic] Model: {self.model}")
+            print(f"[Anthropic] Response content: {response_content}")
+            print(f"[Anthropic] Tokens used: {tokens_used}")
+            print(f"[Anthropic] Cost: {cost}")
+            print(f"[Anthropic] Latency (ms): {latency_ms}")
+            print(f"{'='*80}")
+
             return {
-                'response': response.content[0].text,
+                'response': response_content or "",
                 'model': self.model,
                 'tokens_used': tokens_used,
                 'cost': cost,
