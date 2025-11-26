@@ -165,14 +165,24 @@ class OpenAIClient(LLMClient):
                 model=self.model,
                 messages=messages,
                 max_completion_tokens=max_tokens,
-                temperature=temperature
+                # temperature=temperature # ignore temperature for now
             )
 
             latency_ms = int((time.time() - start_time) * 1000)
             tokens_used = response.usage.total_tokens
 
-            # Rough cost estimation (update with actual pricing)
-            if 'gpt-5-nano' in self.model or 'o1' in self.model:
+            # Extract response content
+            response_content = response.choices[0].message.content
+
+            # Debug
+            print(f"[OpenAI] Model: {self.model}")
+            print(f"[OpenAI] Response content: {response_content}")
+            print(f"[OpenAI] Tokens used: {tokens_used}")
+            print(f"[OpenAI] Latency (ms): {latency_ms}")
+            print(f"{'='*80}")
+
+            # Rough cost estimation
+            if 'gpt-5-nano' in self.model:
                 cost_per_1k_tokens = 0.005  # Simplified average
             elif 'gpt-4' in self.model:
                 cost_per_1k_tokens = 0.03
@@ -181,7 +191,7 @@ class OpenAIClient(LLMClient):
             cost = (tokens_used / 1000) * cost_per_1k_tokens
 
             return {
-                'response': response.choices[0].message.content,
+                'response': response_content or "",  # Ensure not None
                 'model': self.model,
                 'tokens_used': tokens_used,
                 'cost': cost,
