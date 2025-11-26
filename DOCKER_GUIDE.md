@@ -54,15 +54,15 @@ This will:
 docker compose exec ollama ollama pull llama3.2
 
 # Pull guardian model for DualLLM defense (recommended)
-docker compose exec ollama ollama pull gemma2:2b
+docker compose exec ollama ollama pull llama3.2:1b
 
 # Verify models are downloaded
 docker compose exec ollama ollama list
 ```
 
 **Models:**
-- `llama3.2` - Main LLM for processing requests (2.0 GB)
-- `gemma2:2b` - Guardian model for DualLLM defense (1.6 GB, optional but recommended)
+- `llama3.2` - Main LLM for processing requests
+- `llama3.2:1b` - Guardian model for DualLLM defense
 
 ### 3. Setup Database
 
@@ -246,7 +246,7 @@ docker compose up -d
 
 # Setup models
 docker compose exec ollama ollama pull llama3.2
-docker compose exec ollama ollama pull gemma2:2b  # For DualLLM defense
+docker compose exec ollama ollama pull llama3.2:1b  # For DualLLM defense
 
 # Setup database
 docker compose exec app python scripts/setup_db.py
@@ -446,7 +446,7 @@ docker compose up -d
 
 # 3. Pull models
 docker compose exec ollama ollama pull llama3.2
-docker compose exec ollama ollama pull gemma2:2b  # For DualLLM defense
+docker compose exec ollama ollama pull llama3.2:1b  # For DualLLM defense
 
 # 4. Setup database
 docker compose exec app python scripts/setup_db.py
@@ -495,7 +495,7 @@ crontab -e
 1. Start services: `docker compose up -d`
 2. Pull models:
    - `docker compose exec ollama ollama pull llama3.2`
-   - `docker compose exec ollama ollama pull gemma2:2b` (for DualLLM)
+   - `docker compose exec ollama ollama pull llama3.2:1b` (for DualLLM)
 3. Run tests: `docker compose exec app python scripts/run_simple_test.py`
 4. View results: `ls -la data/exports/`
 

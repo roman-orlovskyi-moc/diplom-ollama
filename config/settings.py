@@ -21,16 +21,14 @@ BASE_DIR = Path(__file__).parent.parent
 DEFAULT_OLLAMA_MODEL = 'llama3.2'
 
 # Guardian model
-GUARDIAN_MODEL = 'llama3.2'
-# Other options: 'llama3.2:1b', 'gemma2:2b', 'phi3:mini', 'qwen2.5:3b'
+GUARDIAN_MODEL = 'llama3.2:1b'
+# Other options: 'llama3.2', 'gemma3:1b'
 
 # OpenAI models (API)
-DEFAULT_OPENAI_MODEL = 'gpt-4o'  # Latest GPT-4 Omni model
-# Other options: 'gpt-4', 'gpt-4-turbo', 'o1-preview', 'o1-mini'
+DEFAULT_OPENAI_MODEL = 'gpt-5-nano'
 
 # Anthropic models (API)
-DEFAULT_ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929'  # Claude Sonnet 4.5
-# Other options: 'claude-3-5-sonnet-20241022', 'claude-3-opus-20240229'
+DEFAULT_ANTHROPIC_MODEL = 'claude-haiku-4-5-20251001'
 
 # Perplexity filter model (local, for defense mechanisms)
 DEFAULT_PERPLEXITY_MODEL = 'distilgpt2'

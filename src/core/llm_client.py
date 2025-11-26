@@ -172,8 +172,7 @@ class OpenAIClient(LLMClient):
             tokens_used = response.usage.total_tokens
 
             # Rough cost estimation (update with actual pricing)
-            # GPT-4o pricing: $2.50 per 1M input tokens, $10 per 1M output tokens
-            if 'gpt-4o' in self.model or 'o1' in self.model:
+            if 'gpt-5-nano' in self.model or 'o1' in self.model:
                 cost_per_1k_tokens = 0.005  # Simplified average
             elif 'gpt-4' in self.model:
                 cost_per_1k_tokens = 0.03
