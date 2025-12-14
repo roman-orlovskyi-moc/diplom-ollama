@@ -1,47 +1,22 @@
-"""
-Semantic Similarity Defense (Embedding-Based Detection)
-
-This defense uses sentence embeddings to detect inputs semantically similar
-to known attack patterns, even if they're paraphrased or obfuscated.
-
-Technique: ML-based Detection with Semantic Understanding
-Approach: Uses pre-trained sentence transformers to embed inputs and compare
-          against a database of known attack patterns.
-"""
 import numpy as np
 from typing import Dict, Any, List, Optional
 from src.defenses import DefenseBase
 
 
 class SemanticSimilarity(DefenseBase):
-    """
-    Detects attacks by comparing semantic meaning to known attack patterns.
-
-    Unlike keyword-based defenses, this approach understands meaning, so it can
-    catch paraphrased attacks, attacks in different languages, or cleverly
-    worded attempts that would bypass simple pattern matching.
-
-    How it works:
-    1. Convert user input to embedding (numerical representation of meaning)
-    2. Compare to embeddings of known attack patterns
-    3. If similarity > threshold, flag as potential attack
-    """
 
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__(config)
 
-        # Configuration
         self.threshold = config.get('threshold', 0.75) if config else 0.75
         self.model_name = config.get('model_name', 'all-MiniLM-L6-v2') if config else 'all-MiniLM-L6-v2'
         self.block_message = config.get('block_message',
             '[BLOCKED: Input semantically similar to known attack pattern]') if config else \
             '[BLOCKED: Input semantically similar to known attack pattern]'
 
-        # Lazy loading
         self.model = None
         self._model_loaded = False
 
-        # Attack pattern embeddings (will be computed on first use)
         self.attack_patterns = self._get_attack_patterns()
         self.attack_embeddings = None
 
@@ -126,7 +101,6 @@ class SemanticSimilarity(DefenseBase):
             self.model = SentenceTransformer(self.model_name)
             self._model_loaded = True
 
-            # Pre-compute attack pattern embeddings
             print("Computing attack pattern embeddings...")
             self.attack_embeddings = self.model.encode(
                 self.attack_patterns,
@@ -198,7 +172,6 @@ class SemanticSimilarity(DefenseBase):
         if not self.enabled:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
-        # Skip very short inputs
         if len(user_input.strip()) < 10:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
@@ -210,25 +183,20 @@ class SemanticSimilarity(DefenseBase):
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
         try:
-            # Embed user input
             input_embedding = self.model.encode(
                 user_input,
                 convert_to_numpy=True,
                 show_progress_bar=False
             )
 
-            # Get maximum similarity to attack patterns
             max_similarity = self._get_max_similarity(input_embedding)
 
-            # Check against threshold
             if max_similarity > self.threshold:
-                # High similarity to known attack
                 return {
                     'user_input': f"{self.block_message} (similarity: {max_similarity:.2f})",
                     'system_prompt': system_prompt
                 }
 
-            # Low similarity - allow
             return {
                 'user_input': user_input,
                 'system_prompt': system_prompt
@@ -236,7 +204,6 @@ class SemanticSimilarity(DefenseBase):
 
         except Exception as e:
             print(f"Error in semantic similarity check: {e}")
-            # Default to allowing if error
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
     def protect_output(self, output: str, context: Dict[str, Any]) -> str:
@@ -290,44 +257,3 @@ class SemanticSimilarity(DefenseBase):
                 convert_to_numpy=True,
                 show_progress_bar=False
             )
-
-    def get_metadata(self) -> Dict[str, Any]:
-        """Return defense metadata"""
-        return {
-            'name': self.name,
-            'type': 'ml_based_semantic',
-            'approach': 'Embedding-based similarity detection',
-            'enabled': self.enabled,
-            'config': {
-                'threshold': self.threshold,
-                'model_name': self.model_name,
-                'num_attack_patterns': len(self.attack_patterns)
-            },
-            'description': 'Detects attacks by semantic similarity to known patterns',
-            'strengths': [
-                'Catches paraphrased attacks',
-                'Works across languages',
-                'Semantic understanding vs keyword matching',
-                'Robust to obfuscation that preserves meaning',
-                'Uses pre-trained models (no training needed)'
-            ],
-            'weaknesses': [
-                'Requires model inference (adds latency)',
-                'May flag legitimate similar requests',
-                'Requires good attack pattern database',
-                'Less effective on novel attack types'
-            ],
-            'effective_against': [
-                'Paraphrased jailbreaks',
-                'Instruction injection variants',
-                'Role manipulation attempts',
-                'Authority claims',
-                'Data extraction requests'
-            ]
-        }
-
-    def __str__(self) -> str:
-        return "SemanticSimilarity"
-
-    def __repr__(self) -> str:
-        return f"SemanticSimilarity(threshold={self.threshold}, patterns={len(self.attack_patterns)}, enabled={self.enabled})"

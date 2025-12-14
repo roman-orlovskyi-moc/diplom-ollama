@@ -7,7 +7,6 @@ from typing import Optional, Dict, Any
 from enum import Enum
 import time
 
-# Import model name constants
 from config.settings import (
     OLLAMA_BASE_URL,
     DEFAULT_OLLAMA_MODEL,
@@ -77,7 +76,6 @@ class OllamaClient(LLMClient):
 
         start_time = time.time()
 
-        # Prepare payload
         payload = {
             "model": self.model,
             "prompt": prompt,
@@ -88,12 +86,10 @@ class OllamaClient(LLMClient):
             }
         }
 
-        # Add system prompt if provided
         if system_prompt:
             payload["system"] = system_prompt
 
         try:
-            # Call Ollama API
             response = requests.post(
                 f"{self.base_url}/api/generate",
                 json=payload,
@@ -108,7 +104,6 @@ class OllamaClient(LLMClient):
 
             response_content = data.get('response', '')
 
-            # Debug
             print(f"[Ollama] Model: {self.model}")
             print(f"[Ollama] Response content: {response_content}")
             print(f"[Ollama] Tokens used: {tokens_used}")
@@ -185,16 +180,12 @@ class OpenAIClient(LLMClient):
 
             response_content = response.choices[0].message.content
 
-            # Rough cost estimation
             if 'gpt-5-nano' in self.model:
-                cost_per_1k_tokens = 0.005  # Simplified average
-            elif 'gpt-4' in self.model:
-                cost_per_1k_tokens = 0.03
+                cost_per_1k_tokens = 0.005
             else:
                 cost_per_1k_tokens = 0.002
             cost = (tokens_used / 1000) * cost_per_1k_tokens
 
-            # Debug
             print(f"[OpenAI] Model: {self.model}")
             print(f"[OpenAI] Response content: {response_content}")
             print(f"[OpenAI] Tokens used: {tokens_used}")
@@ -269,13 +260,11 @@ class AnthropicClient(LLMClient):
 
             response_content = response.content[0].text
 
-            # Rough cost estimation
             cost_per_1k_input = 0.0001
             cost_per_1k_output = 0.0005
             cost = (response.usage.input_tokens / 1000) * cost_per_1k_input + \
                    (response.usage.output_tokens / 1000) * cost_per_1k_output
 
-            # Debug
             print(f"[Anthropic] Model: {self.model}")
             print(f"[Anthropic] Response content: {response_content}")
             print(f"[Anthropic] Tokens used: {tokens_used}")

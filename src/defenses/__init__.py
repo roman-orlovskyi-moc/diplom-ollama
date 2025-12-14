@@ -41,21 +41,6 @@ class DefenseBase(ABC):
         """
         pass
 
-    def get_metadata(self) -> Dict[str, Any]:
-        """Return defense mechanism metadata"""
-        return {
-            'name': self.name,
-            'enabled': self.enabled,
-            'config': self.config,
-            'description': self.__doc__ or 'No description available'
-        }
-
-    def __str__(self) -> str:
-        return self.name
-
-    def __repr__(self) -> str:
-        return f"{self.name}(enabled={self.enabled})"
-
 
 # Import all defense implementations
 from src.defenses.input_sanitizer import InputSanitizer

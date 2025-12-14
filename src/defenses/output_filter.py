@@ -55,24 +55,20 @@ class OutputFilter(DefenseBase):
         Returns:
             Filtered output or block message
         """
-        # Check for forbidden patterns
+
         for pattern in self.forbidden_patterns:
             if re.search(pattern, output, re.IGNORECASE):
                 return self.block_message
 
-        # Check if output contains significant portion of system prompt
         system_prompt = context.get('system_prompt', '')
         if system_prompt and len(system_prompt) > 50:
             overlap = self._calculate_overlap(output, system_prompt)
             if overlap > self.overlap_threshold:
                 return self.block_message
 
-        # Check for potential data leakage patterns
-        # Credit card numbers
         if re.search(r'\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b', output):
             return self.block_message
 
-        # API keys (common formats)
         if re.search(r'\b(sk|pk)[-_][a-zA-Z0-9]{20,}\b', output):
             return self.block_message
 
@@ -96,6 +92,5 @@ class OutputFilter(DefenseBase):
         if not words2:
             return 0.0
 
-        # Calculate intersection
         intersection = words1.intersection(words2)
         return len(intersection) / len(words2)
