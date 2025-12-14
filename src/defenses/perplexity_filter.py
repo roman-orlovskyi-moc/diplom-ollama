@@ -41,7 +41,6 @@ class PerplexityFilter(DefenseBase):
     def __init__(self, config: Dict[str, Any] = None):
         super().__init__(config)
 
-        # Configuration
         self.threshold = config.get('threshold', 150) if config else 150
         self.model_name = config.get('model_name', DEFAULT_PERPLEXITY_MODEL) if config else DEFAULT_PERPLEXITY_MODEL
         self.max_length = config.get('max_length', 512) if config else 512
@@ -49,7 +48,6 @@ class PerplexityFilter(DefenseBase):
             '[BLOCKED: Input appears to be encoded or obfuscated]') if config else \
             '[BLOCKED: Input appears to be encoded or obfuscated]'
 
-        # Lazy loading - only load model when first used
         self.model = None
         self.tokenizer = None
         self._model_loaded = False
@@ -103,15 +101,13 @@ class PerplexityFilter(DefenseBase):
         if not self.enabled:
             return 0.0
 
-        # Load model if needed
         if not self._model_loaded:
             self._load_model()
 
-        if not self._model_loaded:  # Still not loaded - error occurred
+        if not self._model_loaded:
             return 0.0
 
         try:
-            # Tokenize input
             encodings = self.tokenizer(
                 text,
                 max_length=self.max_length,
@@ -119,7 +115,6 @@ class PerplexityFilter(DefenseBase):
                 return_tensors='pt'
             )
 
-            # Calculate perplexity
             with torch.no_grad():
                 outputs = self.model(**encodings, labels=encodings['input_ids'])
                 loss = outputs.loss
@@ -129,7 +124,7 @@ class PerplexityFilter(DefenseBase):
 
         except Exception as e:
             print(f"Error calculating perplexity: {e}")
-            return 0.0  # Default to allowing if error
+            return 0.0
 
     def protect_input(self, user_input: str, system_prompt: str) -> Dict[str, str]:
         """
@@ -145,22 +140,17 @@ class PerplexityFilter(DefenseBase):
         if not self.enabled:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
-        # Skip very short inputs (perplexity unreliable)
         if len(user_input.strip()) < 10:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
-        # Calculate perplexity
         perplexity = self._calculate_perplexity(user_input)
 
-        # Check against threshold
         if perplexity > self.threshold:
-            # High perplexity - likely attack
             return {
                 'user_input': f"{self.block_message} (perplexity: {perplexity:.1f})",
                 'system_prompt': system_prompt
             }
 
-        # Normal perplexity - allow
         return {
             'user_input': user_input,
             'system_prompt': system_prompt
@@ -192,44 +182,3 @@ class PerplexityFilter(DefenseBase):
         if not self.enabled:
             return None
         return self._calculate_perplexity(text)
-
-    def get_metadata(self) -> Dict[str, Any]:
-        """Return defense metadata"""
-        return {
-            'name': self.name,
-            'type': 'ml_based_detection',
-            'approach': 'Perplexity-based anomaly detection',
-            'enabled': self.enabled,
-            'config': {
-                'threshold': self.threshold,
-                'model_name': self.model_name,
-                'max_length': self.max_length
-            },
-            'description': 'Detects encoded/obfuscated inputs using language model perplexity',
-            'strengths': [
-                'Catches encoding attacks (Base64, ROT13, etc.)',
-                'Detects character substitution and leetspeak',
-                'Language-agnostic detection',
-                'No training required (uses pre-trained model)'
-            ],
-            'weaknesses': [
-                'Requires model inference (adds latency)',
-                'May flag legitimate technical content',
-                'Threshold tuning needed for optimal performance',
-                'Less effective on natural language attacks'
-            ],
-            'effective_against': [
-                'Base64 encoding',
-                'ROT13 and Caesar ciphers',
-                'Unicode obfuscation',
-                'Leetspeak',
-                'Random character injection',
-                'ASCII art attacks'
-            ]
-        }
-
-    def __str__(self) -> str:
-        return "PerplexityFilter"
-
-    def __repr__(self) -> str:
-        return f"PerplexityFilter(threshold={self.threshold}, model={self.model_name}, enabled={self.enabled})"

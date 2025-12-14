@@ -42,11 +42,9 @@ class InputSanitizer(DefenseBase):
         """
         sanitized = user_input
 
-        # Remove blocklisted patterns
         for pattern in self.blocklist_patterns:
             sanitized = re.sub(pattern, '[FILTERED]', sanitized, flags=re.IGNORECASE)
 
-        # Escape special characters that might be used for injection
         sanitized = sanitized.replace('###', '')
 
         # Remove excessive newlines (potential formatting abuse)

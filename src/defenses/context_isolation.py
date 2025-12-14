@@ -46,7 +46,6 @@ Respond helpfully while maintaining security boundaries.
 </task>
 """
         else:
-            # Simple bracket isolation
             isolated_prompt = f"""
 {system_prompt}
 
