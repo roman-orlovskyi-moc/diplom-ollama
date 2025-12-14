@@ -175,11 +175,10 @@ class SemanticSimilarity(DefenseBase):
         if len(user_input.strip()) < 10:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
-        # Load model if needed
         if not self._model_loaded:
             self._load_model()
 
-        if not self._model_loaded:  # Still not loaded - error occurred
+        if not self._model_loaded:
             return {'user_input': user_input, 'system_prompt': system_prompt}
 
         try:

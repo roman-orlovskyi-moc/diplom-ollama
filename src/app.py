@@ -21,9 +21,8 @@ from src.defenses.context_isolation import ContextIsolation
 from src.defenses.dual_llm import DualLLM
 from src.defenses.instruction_hierarchy import InstructionHierarchy
 from config.settings import (
-    LLM_PROVIDER,
-    OPENAI_TPM_LIMIT,
-    ANTHROPIC_TPM_LIMIT
+    LLM_PROVIDER, OLLAMA_BASE_URL, GUARDIAN_MODEL,
+    OPENAI_TPM_LIMIT, ANTHROPIC_TPM_LIMIT
 )
 
 # Try to import ML-based defenses (optional dependencies)
@@ -59,6 +58,13 @@ db = Database()
 db.create_tables()  # Ensure database tables are created
 eval_engine = EvaluationEngine(llm_client, db)
 
+guardian_client = LLMClientFactory.create(
+    LLMProvider.OLLAMA,
+    base_url=OLLAMA_BASE_URL,
+    model=GUARDIAN_MODEL
+)
+print(f"[Web UI] Guardian client initialized for DualLLM defense")
+
 # Initialize rate limiter based on current LLM provider
 rate_limiter = None
 if LLM_PROVIDER == 'openai':
@@ -77,6 +83,7 @@ DEFENSES = {
     'prompt_template': ('Prompt Template', PromptTemplate()),
     'output_filter': ('Output Filter', OutputFilter()),
     'context_isolation': ('Context Isolation', ContextIsolation()),
+    'dual_llm': ('Dual LLM Guardian', DualLLM({'guardian_client': guardian_client})),
     'instruction_hierarchy': ('Instruction Hierarchy', InstructionHierarchy()),
 }
 

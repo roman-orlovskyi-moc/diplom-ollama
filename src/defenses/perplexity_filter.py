@@ -124,7 +124,7 @@ class PerplexityFilter(DefenseBase):
 
         except Exception as e:
             print(f"Error calculating perplexity: {e}")
-            return 0.0  # Default to allowing if error
+            return 0.0
 
     def protect_input(self, user_input: str, system_prompt: str) -> Dict[str, str]:
         """
