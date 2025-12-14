@@ -81,7 +81,7 @@
                                     <th>Defense Mechanism</th>
                                     <th>Status</th>
                                     <th>Latency</th>
-                                    <th>Response Preview</th>
+                                    <th style="min-width: 400px;">Response</th>
                                 </tr>
                             </thead>
                             <tbody id="comparisonTableBody">
@@ -215,14 +215,38 @@ $(document).ready(function() {
                             : '<span class="badge bg-success">BLOCKED</span>');
 
                     const latency = result.latency_ms ? result.latency_ms + ' ms' : 'N/A';
-                    const response = result.error || result.response;
+
+                    let responseHtml = '';
+                    if (result.error) {
+                        responseHtml = `<small class="text-danger">${result.error}</small>`;
+                    } else if (result.metadata && result.metadata.response_modified) {
+                        const originalResponse = result.metadata.original_response || 'N/A';
+                        const filteredResponse = result.response || 'N/A';
+                        responseHtml = `
+                            <div class="mb-2">
+                                <strong class="text-danger"><i class="bi bi-exclamation-triangle"></i> LLM Response:</strong>
+                                <div class="alert alert-danger py-1 px-2 mt-1 mb-2" style="font-size: 0.85em;">
+                                    ${originalResponse.substring(0, 300)}${originalResponse.length > 300 ? '...' : ''}
+                                </div>
+                            </div>
+                            <div>
+                                <strong class="text-success"><i class="bi bi-shield-check"></i> After Defense:</strong>
+                                <div class="alert alert-success py-1 px-2 mt-1" style="font-size: 0.85em;">
+                                    ${filteredResponse.substring(0, 300)}${filteredResponse.length > 300 ? '...' : ''}
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        const response = result.response || 'N/A';
+                        responseHtml = `<small>${response.substring(0, 400)}${response.length > 400 ? '...' : ''}</small>`;
+                    }
 
                     tbody.append(`
                         <tr>
                             <td><strong>${result.defense_name}</strong></td>
                             <td>${status}</td>
                             <td>${latency}</td>
-                            <td><small>${response}</small></td>
+                            <td>${responseHtml}</td>
                         </tr>
                     `);
                 });

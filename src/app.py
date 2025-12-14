@@ -146,7 +146,8 @@ def compare_defenses():
                 'defense_name': defense_label,
                 'attack_successful': result.attack_successful,
                 'response': result.response,
-                'latency_ms': result.latency_ms
+                'latency_ms': result.latency_ms,
+                'metadata': result.metadata
             })
         except Exception as e:
             results.append({
