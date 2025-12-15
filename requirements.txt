@@ -1,18 +1,18 @@
-Flask==3.0.0
-Flask-CORS==4.0.0
+Flask>=3.0.0
+Flask-CORS>=4.0.0
 
 openai>=1.59.0
 anthropic>=0.43.0
-requests==2.31.0
+requests>=2.31.0
 
 # ML-Based Defenses (for perplexity filter and semantic similarity)
 transformers>=4.35.0
 torch>=2.2.0
 sentence-transformers>=2.2.2
-numpy==1.26.3
+numpy>=1.26.3
 
 # Visualization
-matplotlib==3.8.2
+matplotlib>=3.8.2
 
-python-dotenv==1.0.0
-tqdm==4.66.1
+python-dotenv>=1.0.0
+tqdm>=4.66.1
